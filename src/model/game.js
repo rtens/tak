@@ -19,6 +19,11 @@ export default class Game {
       return new Forfeit(this.forfeited)
     }
 
+    const road = this.board.road()
+    if (road) {
+      return new RoadWin(road[0].top().color)
+    }
+
     if (this.board.filled()
       || this.board.white.empty() && this.board.black.empty()
     ) {
@@ -31,11 +36,6 @@ export default class Game {
       } else {
         return new Draw()
       }
-    }
-
-    const road = this.board.road()
-    if (road) {
-      return new RoadWin(road[0].top().color)
     }
   }
 

@@ -52,6 +52,31 @@ test('black wins', async t => {
   t.pass()
 })
 
+test('road with board fill', async t => {
+  const inter = new MockInterface(t)
+  const runner = new Runner(inter)
+
+  runner.import = MockPlayer.playing([
+    'a1', 'b1', 'c1', 'b2', 'a2', 'a3',
+    'b3', 'c3', 'b1<', 'c2', 'b1'
+  ]).import()
+
+  inter.answer("Player 1:", "foo One")
+  inter.answer("Player 2:", "foo Two")
+  inter.answer("Who is white? (1, 2, [r]andom)", "1")
+  inter.answer("Board size: (3-8 [5])", "3")
+
+  await runner.run()
+
+  t.true(inter.closed)
+  t.like(inter.outputs.slice(-2), [
+    "One won by road",
+    "R-0",
+  ])
+
+  t.pass()
+})
+
 test('snake', t => {
   const board = new Board(4)
 
