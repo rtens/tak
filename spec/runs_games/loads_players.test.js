@@ -12,11 +12,9 @@ test('existing file', async t => {
     return { default: class { } }
   }
 
+  inter.answer("Player 1:", "foo")
+  inter.answer("Player 2:", "bar")
   runner.run()
-
-  await inter.answer("Player 1:", "foo")
-  await inter.answer("Player 2:", "bar")
-  await inter.next()
 
   t.like(imported, [
     './players/foo.js',
@@ -38,11 +36,9 @@ test('with arguments', async t => {
     }
   })
 
+  inter.answer("Player 1:", "foo one two")
+  inter.answer("Player 2:", "bar tre")
   runner.run()
-
-  await inter.answer("Player 1:", "foo one two")
-  await inter.answer("Player 2:", "bar tre")
-  await inter.next()
 
   t.like(constructed, [
     ['one', 'two'],
