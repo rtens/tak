@@ -39,7 +39,7 @@ export default class Square {
 
   clone() {
     const square = new Square(this.coords)
-    square.pieces = [...this.pieces]
+    square.pieces = this.pieces.map(p => p.clone())
     return square
   }
 }

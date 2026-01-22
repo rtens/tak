@@ -2,6 +2,7 @@ import Coords from './coords.js'
 import { Move } from './play.js'
 import Square from './square.js'
 import Stash from './stash.js'
+import { Capstone, Stone } from '../model/piece.js'
 
 export default class Board {
 
@@ -98,6 +99,55 @@ export default class Board {
     }
 
     return null
+  }
+
+  print() {
+    const repeat = v => [...Array(this.size)].map(() => v)
+    let lines = ['  ,' + repeat('---').join('-') + ',']
+
+    const stacks = []
+    for (let r = 0; r < this.size; r++) {
+      stacks.push([])
+      for (let f = 0; f < this.size; f++) {
+        stacks[r].push(this.square(new Coords(f, r)).pieces)
+      }
+    }
+
+    const rows = []
+    for (let r = this.size - 1; r >= 0; r--) {
+      const max = Math.max(1, ...stacks[r].map(s => s.length))
+
+      for (let l = max - 1; l >= 0; l--) {
+        const row = []
+        for (const stack of stacks[r]) {
+          let p = ' '
+          const piece = stack[l]
+
+          if (piece) {
+            if (piece instanceof Stone) {
+              p = piece.standing ? 's' : 'f'
+            } else if (piece instanceof Capstone) {
+              p = 'c'
+            }
+
+            if (piece.color == 'white') {
+              p = p.toUpperCase()
+            }
+          }
+
+          row.push(' ' + p + ' ')
+        }
+        rows.push((r + 1) + ' |' + row.join('|') + '|')
+      }
+      rows.push('  |' + repeat('---').join('-') + '|')
+    }
+
+    lines.push(...rows.slice(0, -1))
+    lines.push("  '" + repeat('---').join('-') + "'")
+    lines.push('   ' + [...Array(this.size).keys()]
+      .map(i => ' ' + String.fromCharCode(97 + i) + ' ').join(' '))
+
+    return lines.join('\n')
   }
 }
 

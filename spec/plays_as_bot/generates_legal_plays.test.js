@@ -89,32 +89,86 @@ test('limited directions', t => {
     ])
 })
 
-test.skip('lonely stack', t => {
-  const board = new Board(3)
-  board.squares['b2'].stack(new Stack([
-    new Stone('black'),
+test('lonely stack', t => {
+  const board = new Board(7)
+  board.squares['d4'].stack(new Stack([
     new Stone('white'),
-    new Stone('black'),
+    new Stone('white'),
+    new Stone('white'),
+  ]))
+
+  const plays = new Bot()
+    .legal_plays(board, 'white')
+
+  for (const d of Object.keys(Move.directions))
+    t.deepEqual(plays
+      .filter(p => p instanceof Move)
+      .map(p => p.ptn())
+      .filter(p => p.includes(d)),
+      [
+        `d4${d}`,
+        `2d4${d}`,
+        `2d4${d}11`,
+        `3d4${d}`,
+        `3d4${d}21`,
+        `3d4${d}12`,
+        `3d4${d}111`,
+      ])
+})
+
+test('small board', t => {
+  const board = new Board(5)
+  board.squares['c3'].stack(new Stack([
+    new Stone('white'),
+    new Stone('white'),
+    new Stone('white'),
   ]))
 
   const plays = new Bot()
     .legal_plays(board, 'white')
 
   t.deepEqual(plays
-              .filter(p => p instanceof Move)
-              .map(p => p.ptn())
-              .filter(p => p.contains('>')),
+    .filter(p => p instanceof Move)
+    .map(p => p.ptn())
+    .filter(p => p.includes('>')),
     [
-      'b2>',
-      '2b2>',
-      '2b2>11',
-      '3b2>',
-      '3b2>21',
-      '3b2>12',
-      '3b2>111'
+      'c3>',
+      '2c3>',
+      '2c3>11',
+      '3c3>',
+      '3c3>21',
+      '3c3>12',
     ])
 })
 
-test.todo('walled off')
+test('walled off', t => {
+  const board = new Board(5)
+  board.squares['c3'].stack(new Stack([
+    new Stone('white'),
+    new Stone('white'),
+  ]))
+  board.squares['d3'].stack(new Stack([
+    new Stone('black').stand()
+  ]))
+  board.squares['c5'].stack(new Stack([
+    new Stone('black').stand()
+  ]))
 
-test.todo('wall smash')
+  const plays = new Bot()
+    .legal_plays(board, 'white')
+
+  t.deepEqual(plays
+    .filter(p => p instanceof Move)
+    .map(p => p.ptn())
+    .filter(p => p.includes('>')),
+    [])
+
+  t.deepEqual(plays
+    .filter(p => p instanceof Move)
+    .map(p => p.ptn())
+    .filter(p => p.includes('+')),
+    [
+      'c3+',
+      '2c3+',
+    ])
+})

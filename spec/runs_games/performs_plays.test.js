@@ -68,9 +68,7 @@ test('applies plays', async t => {
 
   t.like(applied, [
     ['One', Board, 'black'],
-    ['One', Board, 'black'],
     ['Two', Board, 'white'],
-    ['Two', Board, 'white']
   ])
 })
 

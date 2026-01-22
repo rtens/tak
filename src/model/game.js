@@ -58,9 +58,9 @@ export default class Game {
         : 'black'
     }
 
-    play.apply(this.board.clone(), color)
-
-    play.apply(this.board, color)
+    const clone = this.board.clone()
+    play.apply(clone, color)
+    this.board = clone
     this.plays.push(play)
   }
 
@@ -80,5 +80,30 @@ export default class Game {
     game.board = this.board.clone()
     game.plays = [...this.plays]
     return game
+  }
+
+  ptn() {
+    const turns = []
+    for (let p = 0; p < this.plays.length; p += 2) {
+      const parts = [turns.length + 1 + '.']
+      parts.push(this.plays[p].ptn())
+      if (this.plays[p + 1]) parts.push(this.plays[p + 1].ptn())
+      turns.push(parts.join(' '))
+    }
+
+    return [
+      '[Site "takbot"]',
+      '[Event "Local Play"]',
+      `[Date "${new Date().toISOString().slice(0, 10)}"]`,
+      `[Time "${new Date().toISOString().slice(11)}"]`,
+      '[Player1 "Unknown"]',
+      '[Player2 "Unknown"]',
+      '[Clock "none"]',
+      `[Result "${this.result().ptn()}"]`,
+      `[Size "${this.board.size}"]`,
+      '',
+      ...turns,
+      this.result().ptn()
+    ].join('\n')
   }
 }

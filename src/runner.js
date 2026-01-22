@@ -74,6 +74,8 @@ export default class Runner {
   }
 
   print_result(game, players) {
+    this.interface.print(game.board.print())
+
     const result = game.result()
     if (result instanceof RoadWin) {
       this.interface.print(`${players[result.color].name()} won by road`)
@@ -85,5 +87,7 @@ export default class Runner {
       this.interface.print(`${players[result.color].name()} forfeits`)
     }
     this.interface.print(result.ptn())
+
+    this.interface.save('games/' + new Date().toISOString(), game.ptn())
   }
 }

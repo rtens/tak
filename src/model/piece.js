@@ -21,8 +21,18 @@ export class Stone extends Piece {
     this.standing = false
     return this
   }
+
+  clone() {
+    const stone = new Stone()
+    stone.color = this.color
+    stone.standing = this.standing
+    return stone
+  }
 }
 
 export class Capstone extends Piece {
 
+  clone() {
+    return this
+  }
 }

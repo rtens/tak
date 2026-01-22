@@ -1,3 +1,5 @@
+import fs from 'fs'
+import path from 'path'
 import readline from 'readline'
 
 export default class Interface {
@@ -19,5 +21,12 @@ export default class Interface {
 
   close() {
     this.rl.close()
+  }
+
+  save(file, content) {
+    const dir = path.dirname(file)
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+
+    fs.writeFileSync(file, content)
   }
 }

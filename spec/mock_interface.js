@@ -3,6 +3,7 @@ export default class MockInterface {
   constructor() {
     this.outputs = []
     this.answers = {}
+    this.saved = []
   }
 
   print(line) {
@@ -23,5 +24,9 @@ export default class MockInterface {
 
   close() {
     this.closed = true
+  }
+
+  save(file, content) {
+    this.saved.push({ file, content })
   }
 }

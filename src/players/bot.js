@@ -1,4 +1,5 @@
 import Board from '../model/board.js'
+import Coords from '../model/coords.js'
 import { Move, PlaceCapstone, PlaceFlat, PlaceWall } from '../model/play.js'
 import Player from '../player.js'
 
@@ -9,16 +10,23 @@ export default class Bot extends Player {
   }
 
   play(game) {
-    while (true) {
-      const play = PlaceFlat.at(
-        Math.floor(Math.random() * game.board.size),
-        Math.floor(Math.random() * game.board.size)
-      )
-      try {
-        game.perform(play)
-        return play
-      } catch { }
+    if (game.plays.length <= 2) {
+      const s = game.board.size - 1
+      const corners = [
+        new Coords(0, 0),
+        new Coords(0, s),
+        new Coords(s, 0),
+        new Coords(s, s),
+      ]
+
+      const empty_corner = corners.find(c =>
+        game.board.square(c).empty())
+
+      return new PlaceFlat(empty_corner)
     }
+
+    const plays = this.legal_plays(game.board, game.turn())
+    return plays[Math.floor(Math.random() * plays.length)]
   }
 
   legal_plays(board, color) {
@@ -37,25 +45,38 @@ export default class Bot extends Player {
 
       } else if (square.top().color == color) {
         for (const dir of Object.keys(Move.directions)) {
-          const height = square.pieces.length
+          const max = square.pieces.length
 
-          const drops = [[height]]
+          for (let take = 1; take <= max; take++) {
+            const drops = this.spread([], take)
 
-          for (const dropped of drops) {
-            const move = new Move(square.coords).to(dir)
-            for (const drop of dropped) {
-              move.drop(drop)
+            for (const dropped of drops) {
+              const move = new Move(square.coords).to(dir)
+              for (const drop of dropped) {
+                move.drop(drop)
+              }
+
+              try {
+                move.apply(board.clone(), color)
+                plays.push(move)
+              } catch { }
             }
-
-            try {
-              move.apply(board.clone(), color)
-              plays.push(move)
-            } catch { }
           }
         }
       }
     }
 
     return plays
+  }
+
+  spread(drops, last) {
+    if (!last) return [drops]
+
+    const spreads = []
+    for (let take = 0; take < last; take++) {
+      spreads.push(...this.spread([...drops, last - take], take))
+    }
+
+    return spreads
   }
 }
