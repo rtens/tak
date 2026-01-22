@@ -223,6 +223,3 @@ test('nothing to move', t => {
 
   t.is(error.message, 'Empty square')
 })
-
-test.todo('unchanged board')
-// Unflatten pieces keeping their color

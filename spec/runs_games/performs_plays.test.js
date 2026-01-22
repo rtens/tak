@@ -4,7 +4,9 @@ import MockPlayer from './mock_player.js'
 import Runner from '../../src/runner.js'
 import Place from '../../src/model/place.js'
 import Board from '../../src/model/board.js'
+import {Cap} from '../../src/model/piece.js'
 import Coords from '../../src/model/coords.js'
+import parse from '../../src/model/parse.js'
 
 test('tracks plays', async t => {
   const inter = new MockInterface(t)
@@ -70,6 +72,59 @@ test('applies plays', async t => {
     ['One', Board, 'black'],
     ['Two', Board, 'white'],
   ])
+})
+
+test('clones game', async t => {
+  const inter = new MockInterface(t)
+  const runner = new Runner(inter)
+
+  let end
+  class MyPlayer extends MockPlayer {
+    play(game) {
+      if (game.plays.length == 0) {
+        game.perform(parse('a5'))
+        game.board.white.capstones = 'stolen'
+        return parse('a1')
+      } else if(game.plays.length == 1) {
+        game.plays = []
+        game.board.squares['a1'].top().stand()
+        game.board.squares['a1'].top().color = 'rainbow'
+        return parse('e5')
+      } else {
+       end = game
+      }
+    }
+  }
+
+  inter.answer("Player 1:", "foo One")
+  inter.answer("Player 2:", "foo Two")
+  inter.answer("Who is white? (1, 2, [r]andom)", "1")
+
+  runner.import = MyPlayer.import()
+  await runner.run()
+
+  t.like(end, {
+    plays: [
+      parse('a1'),
+      parse('e5'),
+    ],
+    board: {
+      white: {
+        capstones: [new Cap('white')]
+      },
+      squares: {
+        a1: {
+          pieces: [{
+            standing: false,
+            color: 'black'
+          }]
+        },
+        a5: {
+          pieces: []
+        }
+      }
+    }
+  })
 })
 
 test('white forfeits', async t => {
