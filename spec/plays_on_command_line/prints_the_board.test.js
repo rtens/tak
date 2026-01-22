@@ -3,7 +3,7 @@ import Cli from '../../src/players/cli.js'
 import Game from '../../src/model/game.js'
 import MockInterface from '../mock_interface.js'
 import Stack from '../../src/model/stack.js'
-import { Capstone, Stone } from '../../src/model/piece.js'
+import { Cap, Stone } from '../../src/model/piece.js'
 
 test('empty board', async t => {
   const inter = new MockInterface()
@@ -67,8 +67,8 @@ test('different pieces', async t => {
   game.board.squares['c3'].stack(new Stack([new Stone('white')]))
   game.board.squares['c1'].stack(new Stack([new Stone('white').stand()]))
   game.board.squares['c2'].stack(new Stack([new Stone('black').stand()]))
-  game.board.squares['a3'].stack(new Stack([new Capstone('black')]))
-  game.board.squares['b3'].stack(new Stack([new Capstone('white')]))
+  game.board.squares['a3'].stack(new Stack([new Cap('black')]))
+  game.board.squares['b3'].stack(new Stack([new Cap('white')]))
 
   inter.answer('Your play:', '')
   await cli.play(game)
@@ -98,7 +98,7 @@ test('stacks', async t => {
   ]))
   game.board.squares['c1'].stack(new Stack([
     new Stone('black'),
-    new Capstone('white')
+    new Cap('white')
   ]))
   game.board.squares['b2'].stack(new Stack([
     new Stone('black'),

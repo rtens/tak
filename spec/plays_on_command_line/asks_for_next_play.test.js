@@ -1,7 +1,7 @@
 import test from 'ava'
 import Cli from '../../src/players/cli.js'
 import MockInterface from '../mock_interface.js'
-import { parse } from '../../src/model/play.js'
+import parse from '../../src/model/parse.js'
 
 test('First play', async t => {
   const inter = new MockInterface()

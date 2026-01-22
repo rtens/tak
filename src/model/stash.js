@@ -1,4 +1,4 @@
-import { Capstone, Stone } from './piece.js'
+import { Cap, Stone } from './piece.js'
 import Stack from './stack.js'
 
 export default class Stash {
@@ -6,7 +6,7 @@ export default class Stash {
   constructor(color, stones, capstones = 0) {
     this.color = color
     this.stones = [...Array(stones)].map(() => new Stone(color))
-    this.capstones = [...Array(capstones)].map(() => new Capstone(color))
+    this.capstones = [...Array(capstones)].map(() => new Cap(color))
   }
 
   take_flat() {

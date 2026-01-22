@@ -30,7 +30,7 @@ export class Stone extends Piece {
   }
 }
 
-export class Capstone extends Piece {
+export class Cap extends Piece {
 
   clone() {
     return this

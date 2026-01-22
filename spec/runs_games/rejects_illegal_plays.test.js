@@ -5,7 +5,9 @@ import Runner from '../../src/runner.js'
 import Game from '../../src/model/game.js'
 import Stack from '../../src/model/stack.js'
 import { Stone } from '../../src/model/piece.js'
-import { Move, parse, PlaceCapstone, PlaceFlat, PlaceWall } from '../../src/model/play.js'
+import Place from '../../src/model/place.js'
+import Move from '../../src/model/move.js'
+import parse from '../../src/model/parse.js'
 
 test('try again', async t => {
   const inter = new MockInterface(t)
@@ -45,33 +47,33 @@ test('out of flats', t => {
   game.board.white.stones = []
 
   const error = t.throws(() =>
-    game.perform(PlaceFlat.at(2, 0)))
+    game.perform(Place.Flat.at(2, 0)))
 
   t.is(error.message, 'No stones left')
 })
 
 test('out of walls', t => {
   const game = new Game(3)
-  game.perform(PlaceFlat.at(0, 0))
-  game.perform(PlaceFlat.at(1, 0))
+  game.perform(Place.Flat.at(0, 0))
+  game.perform(Place.Flat.at(1, 0))
 
   game.board.white.stones = []
 
   const error = t.throws(() =>
-    game.perform(PlaceWall.at(2, 0)))
+    game.perform(Place.Wall.at(2, 0)))
 
   t.is(error.message, 'No stones left')
 })
 
 test('out of capstones', t => {
   const game = new Game(3)
-  game.perform(PlaceFlat.at(0, 0))
-  game.perform(PlaceFlat.at(1, 0))
+  game.perform(Place.Flat.at(0, 0))
+  game.perform(Place.Flat.at(1, 0))
 
   game.board.white.capstones = []
 
   const error = t.throws(() =>
-    game.perform(PlaceCapstone.at(2, 0)))
+    game.perform(Place.Cap.at(2, 0)))
 
   t.is(error.message, 'No capstones left')
 })
@@ -79,7 +81,7 @@ test('out of capstones', t => {
 test('first play not place flat', t => {
   const game = new Game(3)
   const error = t.throws(() =>
-    game.perform(PlaceWall.at(0, 0)))
+    game.perform(Place.Wall.at(0, 0)))
 
   t.is(error.message, 'First two plays must place flats')
 })
@@ -87,9 +89,9 @@ test('first play not place flat', t => {
 test('second play not place flat', t => {
   const game = new Game(3)
 
-  game.perform(PlaceFlat.at(1, 1))
+  game.perform(Place.Flat.at(1, 1))
   const error = t.throws(() =>
-    game.perform(PlaceWall.at(0, 0)))
+    game.perform(Place.Wall.at(0, 0)))
 
   t.is(error.message, 'First two plays must place flats')
 })
@@ -97,9 +99,9 @@ test('second play not place flat', t => {
 test('place on flat', t => {
   const game = new Game(3)
 
-  game.perform(PlaceFlat.at(0, 0))
+  game.perform(Place.Flat.at(0, 0))
   const error = t.throws(() =>
-    game.perform(PlaceFlat.at(0, 0)))
+    game.perform(Place.Flat.at(0, 0)))
 
   t.is(error.message, 'Square not empty')
 })
@@ -107,8 +109,8 @@ test('place on flat', t => {
 test('not your stack', t => {
   const game = new Game(3)
 
-  game.perform(PlaceFlat.at(0, 0))
-  game.perform(PlaceFlat.at(1, 1))
+  game.perform(Place.Flat.at(0, 0))
+  game.perform(Place.Flat.at(1, 1))
 
   const error = t.throws(() =>
     game.perform(Move.at(0, 0).right().drop(1)))
@@ -119,10 +121,10 @@ test('not your stack', t => {
 test('drop on wall', t => {
   const game = new Game(3)
 
-  game.perform(PlaceFlat.at(1, 0))
-  game.perform(PlaceFlat.at(0, 0))
+  game.perform(Place.Flat.at(1, 0))
+  game.perform(Place.Flat.at(0, 0))
 
-  game.perform(PlaceWall.at(2, 0))
+  game.perform(Place.Wall.at(2, 0))
 
   const error = t.throws(() =>
     game.perform(Move.at(1, 0).right().drop(1)))
@@ -130,25 +132,25 @@ test('drop on wall', t => {
   t.is(error.message, "Can't stack on wall")
 })
 
-test('drop on capstone', t => {
+test('drop on cap', t => {
   const game = new Game(5)
 
-  game.perform(PlaceFlat.at(1, 0))
-  game.perform(PlaceFlat.at(0, 0))
+  game.perform(Place.Flat.at(1, 0))
+  game.perform(Place.Flat.at(0, 0))
 
-  game.perform(PlaceCapstone.at(2, 0))
+  game.perform(Place.Cap.at(2, 0))
 
   const error = t.throws(() =>
     game.perform(Move.at(1, 0).right().drop(1)))
 
-  t.is(error.message, "Can't stack on capstone")
+  t.is(error.message, "Can't stack on cap")
 })
 
 test('over carry limit', t => {
   const game = new Game(3)
 
-  game.perform(PlaceFlat.at(1, 0))
-  game.perform(PlaceFlat.at(0, 0))
+  game.perform(Place.Flat.at(1, 0))
+  game.perform(Place.Flat.at(0, 0))
 
   game.board.squares['a1'].stack(new Stack([
     new Stone('white'),
@@ -165,8 +167,8 @@ test('over carry limit', t => {
 test('no direction', t => {
   const game = new Game(3)
 
-  game.perform(PlaceFlat.at(1, 0))
-  game.perform(PlaceFlat.at(0, 0))
+  game.perform(Place.Flat.at(1, 0))
+  game.perform(Place.Flat.at(0, 0))
 
   const error = t.throws(() =>
     game.perform(Move.at(0, 0)))
@@ -177,8 +179,8 @@ test('no direction', t => {
 test('no drops', t => {
   const game = new Game(3)
 
-  game.perform(PlaceFlat.at(1, 0))
-  game.perform(PlaceFlat.at(0, 0))
+  game.perform(Place.Flat.at(1, 0))
+  game.perform(Place.Flat.at(0, 0))
 
   const error = t.throws(() =>
     game.perform(Move.at(0, 0).right()))
@@ -189,8 +191,8 @@ test('no drops', t => {
 test('empty drop', t => {
   const game = new Game(3)
 
-  game.perform(PlaceFlat.at(1, 0))
-  game.perform(PlaceFlat.at(0, 0))
+  game.perform(Place.Flat.at(1, 0))
+  game.perform(Place.Flat.at(0, 0))
 
   const error = t.throws(() =>
     game.perform(Move.at(0, 0).right().drop(0)))
@@ -201,8 +203,8 @@ test('empty drop', t => {
 test('drops more than taken', t => {
   const game = new Game(3)
 
-  game.perform(PlaceFlat.at(1, 0))
-  game.perform(PlaceFlat.at(0, 0))
+  game.perform(Place.Flat.at(1, 0))
+  game.perform(Place.Flat.at(0, 0))
 
   const error = t.throws(() =>
     game.perform(Move.at(0, 0).right().drop(2)))
@@ -213,8 +215,8 @@ test('drops more than taken', t => {
 test('nothing to move', t => {
   const game = new Game(3)
 
-  game.perform(PlaceFlat.at(1, 0))
-  game.perform(PlaceFlat.at(0, 0))
+  game.perform(Place.Flat.at(1, 0))
+  game.perform(Place.Flat.at(0, 0))
 
   const error = t.throws(() =>
     game.perform(Move.at(1, 1).right().drop(1)))

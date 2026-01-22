@@ -1,8 +1,8 @@
 import Coords from './coords.js'
-import { Move } from './play.js'
+import Move from './move.js'
 import Square from './square.js'
 import Stash from './stash.js'
-import { Capstone, Stone } from '../model/piece.js'
+import { Cap, Stone } from '../model/piece.js'
 
 export default class Board {
 
@@ -126,7 +126,7 @@ export default class Board {
           if (piece) {
             if (piece instanceof Stone) {
               p = piece.standing ? 's' : 'f'
-            } else if (piece instanceof Capstone) {
+            } else if (piece instanceof Cap) {
               p = 'c'
             }
 

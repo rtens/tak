@@ -1,6 +1,6 @@
-import Board from '../model/board.js'
 import Coords from '../model/coords.js'
-import { Move, PlaceCapstone, PlaceFlat, PlaceWall } from '../model/play.js'
+import Move from '../model/move.js'
+import Place from '../model/place.js'
 import Player from '../player.js'
 
 export default class Bot extends Player {
@@ -22,7 +22,7 @@ export default class Bot extends Player {
       const empty_corner = corners.find(c =>
         game.board.square(c).empty())
 
-      return new PlaceFlat(empty_corner)
+      return new Place.Flat(empty_corner)
     }
 
     const plays = this.legal_plays(game.board, game.turn())
@@ -36,12 +36,12 @@ export default class Bot extends Player {
       if (square.empty()) {
         if (board[color].stones.length)
           plays.push(
-            new PlaceFlat(square.coords),
-            new PlaceWall(square.coords))
+            new Place.Flat(square.coords),
+            new Place.Wall(square.coords))
 
         if (board[color].capstones.length)
           plays.push(
-            new PlaceCapstone(square.coords))
+            new Place.Cap(square.coords))
 
       } else if (square.top().color == color) {
         for (const dir of Object.keys(Move.directions)) {

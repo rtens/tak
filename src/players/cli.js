@@ -1,4 +1,4 @@
-import { parse } from '../model/play.js'
+import parse from '../model/parse.js'
 import Player from '../player.js'
 
 export default class Cli extends Player {
@@ -6,10 +6,6 @@ export default class Cli extends Player {
   constructor(runner, name) {
     super(runner)
     this.name = () => name
-  }
-
-  async start() {
-    this.runner.interface.print('Press enter to see the board')
   }
 
   async play(game) {

@@ -1,25 +1,27 @@
 import test from 'ava'
-import { Move, parse, PlaceCapstone, PlaceFlat, PlaceWall } from '../../src/model/play.js'
+import Move from '../../src/model/move.js'
+import parse from '../../src/model/parse.js'
+import Place from '../../src/model/place.js'
 import Cli from '../../src/players/cli.js'
 import MockInterface from '../mock_interface.js'
 import Game from '../../src/model/game.js'
 
 test('place flat', t => {
-  t.deepEqual(parse('a1'), PlaceFlat.at(0, 0))
-  t.deepEqual(parse('b1'), PlaceFlat.at(1, 0))
-  t.deepEqual(parse('e5'), PlaceFlat.at(4, 4))
+  t.deepEqual(parse('a1'), Place.Flat.at(0, 0))
+  t.deepEqual(parse('b1'), Place.Flat.at(1, 0))
+  t.deepEqual(parse('e5'), Place.Flat.at(4, 4))
 })
 
 test('place wall', t => {
-  t.deepEqual(parse('Sc1'), PlaceWall.at(2, 0))
-  t.deepEqual(parse('Sb1'), PlaceWall.at(1, 0))
-  t.deepEqual(parse('Se5'), PlaceWall.at(4, 4))
+  t.deepEqual(parse('Sc1'), Place.Wall.at(2, 0))
+  t.deepEqual(parse('Sb1'), Place.Wall.at(1, 0))
+  t.deepEqual(parse('Se5'), Place.Wall.at(4, 4))
 })
 
-test('place capstone', t => {
-  t.deepEqual(parse('Cc1'), PlaceCapstone.at(2, 0))
-  t.deepEqual(parse('Cb1'), PlaceCapstone.at(1, 0))
-  t.deepEqual(parse('Ce5'), PlaceCapstone.at(4, 4))
+test('place cap', t => {
+  t.deepEqual(parse('Cc1'), Place.Cap.at(2, 0))
+  t.deepEqual(parse('Cb1'), Place.Cap.at(1, 0))
+  t.deepEqual(parse('Ce5'), Place.Cap.at(4, 4))
 })
 
 test('move one', t => {

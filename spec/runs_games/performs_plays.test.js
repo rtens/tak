@@ -2,7 +2,7 @@ import test from 'ava'
 import MockInterface from '../mock_interface.js'
 import MockPlayer from './mock_player.js'
 import Runner from '../../src/runner.js'
-import { PlaceFlat } from '../../src/model/play.js'
+import Place from '../../src/model/place.js'
 import Board from '../../src/model/board.js'
 import Coords from '../../src/model/coords.js'
 
@@ -24,7 +24,7 @@ test('tracks plays', async t => {
 
   t.like(plays, [
     [],
-    [PlaceFlat.at(0, 0)]
+    [Place.Flat.at(0, 0)]
   ])
 })
 
@@ -37,7 +37,7 @@ test('applies plays', async t => {
     play(game) {
       if (game.plays.length < 2) {
         const name = this.name()
-        return new class extends PlaceFlat {
+        return new class extends Place.Flat {
           apply(board, color) {
             applied.push([name, board.constructor, color])
             super.apply(board, color)

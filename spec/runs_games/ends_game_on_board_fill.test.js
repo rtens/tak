@@ -2,7 +2,7 @@ import test from 'ava'
 import MockInterface from '../mock_interface.js'
 import Runner from '../../src/runner.js'
 import MockPlayer from './mock_player.js'
-import { PlaceFlat } from '../../src/model/play.js'
+import Place from '../../src/model/place.js'
 
 test('white wins', async t => {
   const inter = new MockInterface(t)
@@ -62,10 +62,10 @@ test('draw', async t => {
   const runner = new Runner(inter)
 
   const first = [
-    PlaceFlat.at(0, 0),
-    PlaceFlat.at(1, 0),
-    PlaceFlat.at(3, 0),
-    PlaceFlat.at(2, 0),
+    Place.Flat.at(0, 0),
+    Place.Flat.at(1, 0),
+    Place.Flat.at(3, 0),
+    Place.Flat.at(2, 0),
   ]
 
   let played = 0

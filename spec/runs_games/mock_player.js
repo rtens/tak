@@ -1,5 +1,7 @@
-import { parse, PlaceFlat } from '../../src/model/play.js'
+import Play from '../../src/model/play.js'
+import Place from '../../src/model/place.js'
 import Player from '../../src/player.js'
+import parse from '../../src/model/parse.js'
 
 export default class MockPlayer extends Player {
 
@@ -15,7 +17,7 @@ export default class MockPlayer extends Player {
   }
 
   play(game) {
-    return PlaceFlat.at(
+    return Place.Flat.at(
       game.plays.length % game.board.size,
       Math.floor(game.plays.length / game.board.size))
   }

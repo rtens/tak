@@ -1,6 +1,6 @@
 import Board from './board.js'
+import Place from './place.js'
 import { Stone } from './piece.js'
-import { PlaceFlat } from './play.js'
 import { Draw, FlatWin, Forfeit, RoadWin } from './result.js'
 
 export default class Game {
@@ -49,7 +49,7 @@ export default class Game {
     let color = this.turn()
 
     if (this.plays.length < 2) {
-      if (!(play instanceof PlaceFlat)) {
+      if (!(play instanceof Place.Flat)) {
         throw new Error('First two plays must place flats')
       }
 
