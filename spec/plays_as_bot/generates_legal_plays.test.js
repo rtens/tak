@@ -173,3 +173,29 @@ test('walled off', t => {
       '2c3+',
     ])
 })
+
+test('carry limit', t => {
+  const board = new Board(3)
+  board.squares['a1'].stack(new Stack([
+    new Stone('white'),
+    new Stone('white'),
+    new Stone('white'),
+    new Stone('white'),
+  ]))
+
+  const plays = new Bot()
+    .legal_plays(board, 'white')
+
+  t.deepEqual(plays
+    .filter(p => p instanceof Move)
+    .map(p => p.ptn())
+    .filter(p => p.includes('>')),
+    [
+      `a1>`,
+      `2a1>`,
+      `2a1>11`,
+      `3a1>`,
+      `3a1>21`,
+      `3a1>12`
+    ])
+})
