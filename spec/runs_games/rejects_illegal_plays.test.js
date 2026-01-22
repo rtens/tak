@@ -27,7 +27,7 @@ test('try again', async t => {
   t.like(inter.outputs.slice(4), [
     'Two plays a1',
     'Illegal play: Square not empty',
-    'Two\'s turn'
+    'Two\'s turn (black)'
   ])
 })
 

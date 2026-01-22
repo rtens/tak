@@ -17,7 +17,7 @@ export default class Runner {
 
     while (!game.result()) {
       const player = players[game.turn()]
-      this.interface.print(`${player.name()}'s turn`)
+      this.interface.print(`${player.name()}'s turn (${game.turn()})`)
 
       const play = await player.play(game.clone())
 

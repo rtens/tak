@@ -60,9 +60,9 @@ test('applies plays', async t => {
   await runner.run()
 
   t.like(inter.outputs.slice(1), [
-    "One's turn",
+    "One's turn (white)",
     "One plays One's play",
-    "Two's turn",
+    "Two's turn (black)",
     "Two plays Two's play"
   ])
 
