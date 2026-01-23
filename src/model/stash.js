@@ -5,7 +5,6 @@ export default class Stash {
 
   constructor(color, stones, caps = 0) {
     this.color = color
-    this.start_count = stones + caps
     this.stones = [...Array(stones)].map(() => new Stone(color))
     this.caps = [...Array(caps)].map(() => new Cap(color))
   }
@@ -41,12 +40,8 @@ export default class Stash {
     }
   }
 
-  missing() {
-    return this.start_count - this.stones.length - this.caps.length
-  }
-
-  empty() {
-    return !this.stones.length && !this.caps.length
+  count() {
+    return this.stones.length + this.caps.length
   }
 
   clone() {

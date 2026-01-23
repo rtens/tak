@@ -2,40 +2,65 @@ import Bot from './bot.js'
 
 export default class Simple extends Bot {
 
+  constructor(runner, depth) {
+    super(runner)
+    this.depth = depth ? parseInt(depth) : 2
+  }
+
   name() {
-    return 'Simple Bot'
+    return 'SimpleBot@' + this.depth
   }
 
   best_play(board, color) {
-    const plays = this.legal_plays(board, color)
+    const evals = this.legal_plays(board, color)
+      .map(play => ({
+        play,
+        evaluation: this.evaluate_play(board.clone(), play, color, this.depth)
+      }))
 
-    const evals = plays.map(play => {
-      const clone = board.clone()
-      play.apply(clone, color)
-      let evaluation = this.evaluate(clone)
-      if (color == 'black') evaluation *= -1
+    // console.log(color, evals.map(e => e.play.ptn() + ' ' + e.evaluation))
 
-      return { play, evaluation }
-    })
+    const best = color == 'white'
+      ? Math.max(...evals.map(e => e.evaluation))
+      : Math.min(...evals.map(e => e.evaluation))
 
-    const max = Math.max(...evals.map(e => e.evaluation))
-    const bests = evals
-      .filter(e => e.evaluation == max)
+    const best_plays = evals
+      .filter(e => e.evaluation == best)
       .map(e => e.play)
 
-    return bests[Math.floor(this.random() * bests.length)]
+    return best_plays[Math.floor(this.random() * best_plays.length)]
+  }
+
+  evaluate_play(board, play, color, depth = 0) {
+    play.apply(board, color)
+    const evaluation = this.evaluate(board)
+
+    if (!depth) return evaluation
+
+    if (Math.abs(evaluation) > 900)
+      return evaluation + (color == 'white' ? depth : -depth)
+
+    const next = color == 'white' ? 'black' : 'white'
+
+    const evals = this.legal_plays(board, next)
+      .map(play => this.evaluate_play(board.clone(), play, next, depth - 1))
+
+    return next == 'white'
+      ? Math.max(...evals)
+      : Math.min(...evals)
   }
 
   evaluate(board) {
-    let evaluation = 0
-
     if (board.road('white')) return 9000
     if (board.road('black')) return -9000
 
-    evaluation += board.white.missing() - board.black.missing()
+    let evaluation = board.black.count() - board.white.count()
 
     const { white, black } = board.flat_count()
     evaluation += (white - black) * 10
+
+    if (board.full() || !board.white.count() || !board.black.count())
+      return (white - black) * 1000
 
     return evaluation
   }

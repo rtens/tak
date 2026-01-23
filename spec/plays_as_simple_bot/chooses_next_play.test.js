@@ -41,7 +41,7 @@ test('finishes white roads', t => {
   t.is(play.ptn(), 'c2')
 })
 
-test.skip('prevents roads', t => {
+test('prevents roads', t => {
   const game = new Game(3)
   game.perform(parse('a1'))
   game.perform(parse('a2'))

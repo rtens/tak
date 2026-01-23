@@ -30,7 +30,7 @@ export default class Board {
     return square
   }
 
-  filled() {
+  full() {
     return !Object.values(this.squares).find(s => s.empty())
   }
 

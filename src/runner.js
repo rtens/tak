@@ -13,7 +13,7 @@ export default class Runner {
     this.interface.print("Let's play Tak")
 
     const players = await this.players()
-    const game = await this.start_game()
+    const game = await this.start_game(players)
 
     while (!game.result()) {
       const player = players[game.turn()]
@@ -66,10 +66,10 @@ export default class Runner {
     return new LoadedPlayer(this, ...args)
   }
 
-  async start_game() {
+  async start_game(players) {
     const size_input = await this.interface.read('Board size: (3-8 [5])')
     const size = Math.max(3, Math.min(8, parseInt(size_input) || 5))
-    const game = new Game(size)
+    const game = new Game(size, players.white, players.black)
     return game
   }
 

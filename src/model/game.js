@@ -1,12 +1,13 @@
 import Board from './board.js'
 import Place from './place.js'
-import { Stone } from './piece.js'
 import { Draw, FlatWin, Forfeit, RoadWin } from './result.js'
 
 export default class Game {
 
-  constructor(board_size = 5) {
+  constructor(board_size = 5, white = null, black = null) {
     this.board = new Board(board_size)
+    this.white = white ? white.name() : 'Unknown'
+    this.black = black ? black.name() : 'Unknown'
     this.plays = []
   }
 
@@ -26,8 +27,9 @@ export default class Game {
       return new RoadWin('black')
     }
 
-    if (this.board.filled()
-      || this.board.white.empty() && this.board.black.empty()
+    if (this.board.full()
+      || !this.board.white.count()
+      || !this.board.black.count()
     ) {
       const { white, black } = this.board.flat_count()
 
@@ -87,8 +89,8 @@ export default class Game {
       '[Event "Local Play"]',
       `[Date "${new Date().toISOString().slice(0, 10)}"]`,
       `[Time "${new Date().toISOString().slice(11)}"]`,
-      '[Player1 "Unknown"]',
-      '[Player2 "Unknown"]',
+      `[Player1 "${this.white}"]`,
+      `[Player2 "${this.black}"]`,
       '[Clock "none"]',
       `[Result "${this.result().ptn()}"]`,
       `[Size "${this.board.size}"]`,
