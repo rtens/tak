@@ -34,7 +34,7 @@ test('no stones', t => {
 
 test('no capstones', t => {
   const board = new Board(5)
-  board.white.capstones = []
+  board.white.caps = []
 
   const plays = new Bot()
     .legal_plays(board, 'white')

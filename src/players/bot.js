@@ -11,7 +11,7 @@ export default class Bot extends Player {
   }
 
   name() {
-    return 'Bot'
+    return 'Random Bot'
   }
 
   play(game) {
@@ -28,7 +28,11 @@ export default class Bot extends Player {
       return new Place.Flat(empty_corner)
     }
 
-    const plays = this.legal_plays(game.board, game.turn())
+    return this.best_play(game.board, game.turn())
+  }
+
+  best_play(board, color) {
+    const plays = this.legal_plays(board, color)
     return plays[Math.floor(this.random() * plays.length)]
   }
 
@@ -42,7 +46,7 @@ export default class Bot extends Player {
             new Place.Flat(square.coords),
             new Place.Wall(square.coords))
 
-        if (board[color].capstones.length)
+        if (board[color].caps.length)
           plays.push(
             new Place.Cap(square.coords))
 

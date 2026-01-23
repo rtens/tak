@@ -3,10 +3,11 @@ import Stack from './stack.js'
 
 export default class Stash {
 
-  constructor(color, stones, capstones = 0) {
+  constructor(color, stones, caps = 0) {
     this.color = color
+    this.start_count = stones + caps
     this.stones = [...Array(stones)].map(() => new Stone(color))
-    this.capstones = [...Array(capstones)].map(() => new Cap(color))
+    this.caps = [...Array(caps)].map(() => new Cap(color))
   }
 
   take_flat() {
@@ -24,10 +25,10 @@ export default class Stash {
   }
 
   take_capstone() {
-    if (!this.capstones.length) {
+    if (!this.caps.length) {
       throw new Error('No capstones left')
     }
-    return Stack.of(this.capstones.pop())
+    return Stack.of(this.caps.pop())
   }
 
   put(stack) {
@@ -35,19 +36,23 @@ export default class Stash {
       if (piece instanceof Stone) {
         this.stones.push(piece.flat())
       } else {
-        this.capstones.push(piece)
+        this.caps.push(piece)
       }
     }
   }
 
+  missing() {
+    return this.start_count - this.stones.length - this.caps.length
+  }
+
   empty() {
-    return !this.stones.length && !this.capstones.length
+    return !this.stones.length && !this.caps.length
   }
 
   clone() {
     return new Stash(
       this.color,
       this.stones.length,
-      this.capstones.length)
+      this.caps.length)
   }
 }

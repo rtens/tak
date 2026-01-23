@@ -18,7 +18,7 @@ test('second play', t => {
   t.is(play.ptn(), 'c3')
 })
 
-test('choses random play', t => {
+test('plays random move', t => {
   const game = new Game(3)
   game.perform(parse('a1'))
   game.perform(parse('a2'))

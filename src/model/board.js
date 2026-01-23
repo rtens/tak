@@ -44,7 +44,18 @@ export default class Board {
     return board
   }
 
-  road() {
+  flat_count() {
+    const counts = { white: 0, black: 0 }
+    for (const square of Object.values(this.squares)) {
+      const top = square.top()
+      if (top instanceof Stone && !top.standing) {
+        counts[top.color]++
+      }
+    }
+    return counts
+  }
+
+  road(color) {
     const squares = {}
     for (const coords in this.squares) {
       squares[coords] = this.squares[coords]
@@ -83,18 +94,16 @@ export default class Board {
     }
 
     for (const square of Object.values(squares)) {
-      for (const color of ['white', 'black']) {
-        const chain = []
-        build_chain(chain, square, color)
-        if (chain.length < this.size) continue
+      const chain = []
+      build_chain(chain, square, color)
+      if (chain.length < this.size) continue
 
-        const files = chain.map(s => s.coords.file)
-        const ranks = chain.map(s => s.coords.rank)
-        if (Math.min(...files) == 0 && Math.max(...files) == this.size - 1
-          || Math.min(...ranks) == 0 && Math.max(...ranks) == this.size - 1
-        ) {
-          return chain
-        }
+      const files = chain.map(s => s.coords.file)
+      const ranks = chain.map(s => s.coords.rank)
+      if (Math.min(...files) == 0 && Math.max(...files) == this.size - 1
+        || Math.min(...ranks) == 0 && Math.max(...ranks) == this.size - 1
+      ) {
+        return chain
       }
     }
 

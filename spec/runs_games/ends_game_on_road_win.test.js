@@ -77,7 +77,13 @@ test('road with board fill', async t => {
   t.pass()
 })
 
-test('snake', t => {
+test('no road', t => {
+  const board = new Board(4)
+
+  t.deepEqual(board.road('white'), null)
+})
+
+test('white snake', t => {
   const board = new Board(4)
 
   const road = ['b1', 'b2', 'c2', 'c3', 'd3', 'd4']
@@ -86,6 +92,7 @@ test('snake', t => {
     board.squares[c]
       .stack(new Stack([new Stone('white')])))
 
-  t.deepEqual(board.road().map(s => s.coords.name()),
+  t.deepEqual(board.road('white')
+    .map(s => s.coords.name()),
     road)
 })

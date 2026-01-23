@@ -61,8 +61,8 @@ test('place cap', t => {
     'Cb2')
 
   check(t, game, 'b2', [new Cap('white')])
-  t.is(game.board.white.capstones.length, 0)
-  t.is(game.board.black.capstones.length, 1)
+  t.is(game.board.white.caps.length, 0)
+  t.is(game.board.black.caps.length, 1)
 })
 
 test('move right', t => {

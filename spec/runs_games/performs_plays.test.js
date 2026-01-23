@@ -4,7 +4,7 @@ import MockPlayer from './mock_player.js'
 import Runner from '../../src/runner.js'
 import Place from '../../src/model/place.js'
 import Board from '../../src/model/board.js'
-import {Cap} from '../../src/model/piece.js'
+import { Cap } from '../../src/model/piece.js'
 import Coords from '../../src/model/coords.js'
 import parse from '../../src/model/parse.js'
 
@@ -83,15 +83,15 @@ test('clones game', async t => {
     play(game) {
       if (game.plays.length == 0) {
         game.perform(parse('a5'))
-        game.board.white.capstones = 'stolen'
+        game.board.white.caps = 'stolen'
         return parse('a1')
-      } else if(game.plays.length == 1) {
+      } else if (game.plays.length == 1) {
         game.plays = []
         game.board.squares['a1'].top().stand()
         game.board.squares['a1'].top().color = 'rainbow'
         return parse('e5')
       } else {
-       end = game
+        end = game
       }
     }
   }
@@ -110,7 +110,7 @@ test('clones game', async t => {
     ],
     board: {
       white: {
-        capstones: [new Cap('white')]
+        caps: [new Cap('white')]
       },
       squares: {
         a1: {

@@ -19,15 +19,17 @@ export default class Game {
       return new Forfeit(this.forfeited)
     }
 
-    const road = this.board.road()
-    if (road) {
-      return new RoadWin(road[0].top().color)
+    if (this.board.road('white')) {
+      return new RoadWin('white')
+    }
+    if (this.board.road('black')) {
+      return new RoadWin('black')
     }
 
     if (this.board.filled()
       || this.board.white.empty() && this.board.black.empty()
     ) {
-      const { white, black } = this.flat_count()
+      const { white, black } = this.board.flat_count()
 
       if (white > black) {
         return new FlatWin('white')
@@ -62,17 +64,6 @@ export default class Game {
     play.apply(clone, color)
     this.board = clone
     this.plays.push(play)
-  }
-
-  flat_count() {
-    const counts = { white: 0, black: 0 }
-    for (const square of Object.values(this.board.squares)) {
-      const top = square.top()
-      if (top instanceof Stone && !top.standing) {
-        counts[top.color]++
-      }
-    }
-    return counts
   }
 
   clone() {

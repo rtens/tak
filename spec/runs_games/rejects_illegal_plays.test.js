@@ -70,7 +70,7 @@ test('out of capstones', t => {
   game.perform(Place.Flat.at(0, 0))
   game.perform(Place.Flat.at(1, 0))
 
-  game.board.white.capstones = []
+  game.board.white.caps = []
 
   const error = t.throws(() =>
     game.perform(Place.Cap.at(2, 0)))
