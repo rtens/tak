@@ -66,12 +66,6 @@ test('black has road', t => {
   t.is(new Bot().evaluate(board), -9000)
 })
 
-test.todo('white has tak')
-
-test.todo('black has tak')
-
-test.todo('...')
-
 function stack(board, fr, ...pieces) {
   board.squares[fr].stack(new Stack(pieces))
 }

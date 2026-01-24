@@ -2,6 +2,9 @@ import test from 'ava'
 import Game from '../../src/model/game.js'
 import parse from '../../src/model/parse.js'
 import Bot from '../../src/players/bot.js'
+import Board from '../../src/model/board.js'
+import Stack from '../../src/model/stack.js'
+import { Stone } from '../../src/model/piece.js'
 
 test('first play', t => {
   const game = new Game()
@@ -79,4 +82,32 @@ test('prevents roads at level 1', t => {
   const play = bot.play(game)
 
   t.is(play.ptn(), 'c2')
+})
+
+test('white prefers the sooner road', t => {
+  const board = new Board(3)
+  board.squares['a3'].stack(new Stack([new Stone('white')]))
+  board.squares['b3'].stack(new Stack([new Stone('white')]))
+
+  const bot = new Bot().at(1)
+  bot.max_time_ms = 10000
+  bot.random = () => 0
+
+  const play = bot.best_play(board, 'white')
+
+  t.is(play.ptn(), 'c3')
+})
+
+test('black prefers the sooner road', t => {
+  const board = new Board(3)
+  board.squares['a3'].stack(new Stack([new Stone('white')]))
+  board.squares['b3'].stack(new Stack([new Stone('white')]))
+
+  const bot = new Bot().at(1)
+  bot.max_time_ms = 10000
+  bot.random = () => 0
+
+  const play = bot.best_play(board, 'white')
+
+  t.is(play.ptn(), 'c3')
 })

@@ -8,7 +8,10 @@ export default class Bot extends Player {
   constructor(runner, level) {
     super(runner)
     this.level = level ? parseInt(level) : 2
+    this.max_time_ms = 100
     this.random = Math.random
+    this.pruning = true
+    this.debug = []
   }
 
   at(level) {
@@ -38,44 +41,76 @@ export default class Bot extends Player {
   }
 
   best_play(board, color) {
-    const depth = this.level
+    const debug = {}
+    this.debug.push(debug)
 
-    const evals = this.legal_plays(board, color)
-      .map(play => ({
-        play,
-        evaluation: this.evaluate_play(board.clone(), play, color, depth)
-      }))
+    debug.evals ||= {}
+    debug.chosen ||= {}
+    const start = new Date().getTime()
 
-    // console.log(color, evals.map(e => e.play.ptn() + ' ' + e.evaluation))
+    let chosen = null
 
-    const best = color == 'white'
-      ? Math.max(...evals.map(e => e.evaluation))
-      : Math.min(...evals.map(e => e.evaluation))
+    try {
+      for (let depth = 0; depth <= this.level; depth++) {
+        debug.evals[depth] = []
 
-    const best_plays = evals
-      .filter(e => e.evaluation == best)
-      .map(e => e.play)
+        let best = -Infinity
+        let plays = []
+        for (const play of this.legal_plays(board, color)) {
 
-    return best_plays[Math.floor(this.random() * best_plays.length)]
+          const clone = board.clone()
+          play.apply(clone, color)
+
+          const side = color == 'white' ? 1 : -1
+          const deep_eval = side * this.deep_evaluate(clone, best, side * -1, depth, start, debug)
+
+          debug.evals[depth].push([play.ptn(), deep_eval])
+
+          if (deep_eval == best) plays.push(play)
+          if (deep_eval <= best) continue
+
+          plays = [play]
+          best = deep_eval
+        }
+
+        // console.log(plays.map(p => p.ptn()))
+
+        chosen = plays[Math.floor(this.random() * plays.length)]
+        debug.chosen[depth] = chosen.ptn()
+      }
+    } catch { }
+
+    return chosen
   }
 
-  evaluate_play(board, play, color, depth = 0) {
-    play.apply(board, color)
-    const evaluation = this.evaluate(board)
+  deep_evaluate(board, bestest, side, depth, start, debug) {
+    debug.searched ||= {}
+    debug.searched[depth] ||= 0
+    debug.searched[depth]++
 
+    const evaluation = this.evaluate(board)
     if (!depth) return evaluation
 
     if (Math.abs(evaluation) > 900)
-      return evaluation + (color == 'white' ? depth : -depth)
+      return evaluation + side * depth
 
-    const next = color == 'white' ? 'black' : 'white'
+    const passed = new Date().getTime() - start
+    if (passed > this.max_time_ms) throw 'TIME_OUT'
 
-    const evals = this.legal_plays(board, next)
-      .map(play => this.evaluate_play(board.clone(), play, next, depth - 1))
+    const color = side == 1 ? 'white' : 'black'
+    let best = -Infinity
+    for (const play of this.legal_plays(board, color)) {
+      const clone = board.clone()
+      play.apply(clone, color)
 
-    return next == 'white'
-      ? Math.max(...evals)
-      : Math.min(...evals)
+      const deep_eval = side * this.deep_evaluate(clone, bestest, side * -1, depth - 1, start, debug)
+      // console.log(depth, color, play.ptn(), deep_eval, bestest)
+
+      if (this.pruning && deep_eval < bestest) return -deep_eval
+      if (deep_eval > best) best = deep_eval
+    }
+
+    return best
   }
 
   evaluate(board) {
@@ -95,6 +130,10 @@ export default class Bot extends Player {
 
   legal_plays(board, color) {
     const plays = []
+
+    if (board.finished()
+      || board.road('white')
+      || board.road('black')) return []
 
     for (const square of Object.values(board.squares)) {
       if (square.empty()) {

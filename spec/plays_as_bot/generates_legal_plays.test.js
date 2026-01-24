@@ -199,3 +199,39 @@ test('carry limit', t => {
       `3a1>12`
     ])
 })
+
+test('full board', t => {
+  const board = new Board(3);
+
+  ['a1', 'a2', 'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3']
+    .forEach((c, i) => parse(c).apply(board, i % 2 ? 'white' : 'black'))
+
+  const plays = new Bot()
+    .legal_plays(board, 'white')
+
+  t.is(plays.length, 0)
+})
+
+test('white road', t => {
+  const board = new Board(3);
+
+  ['a1', 'b1', 'c1']
+    .forEach(c => parse(c).apply(board, 'white'))
+
+  const plays = new Bot()
+    .legal_plays(board, 'white')
+
+  t.is(plays.length, 0)
+})
+
+test('black road', t => {
+  const board = new Board(3);
+
+  ['a1', 'b1', 'c1']
+    .forEach(c => parse(c).apply(board, 'black'))
+
+  const plays = new Bot()
+    .legal_plays(board, 'black')
+
+  t.is(plays.length, 0)
+})
