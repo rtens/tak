@@ -88,6 +88,8 @@ export default class Runner {
     }
     this.interface.print(result.ptn())
 
-    this.interface.save('games/' + new Date().toISOString(), game.ptn())
+    this.interface.save(
+      'games/' + game.started.slice(0, 19).replace(/\D/g, '_'),
+      game.ptn())
   }
 }

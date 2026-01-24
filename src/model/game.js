@@ -8,6 +8,7 @@ export default class Game {
     this.board = new Board(board_size)
     this.white = white ? white.name() : 'Unknown'
     this.black = black ? black.name() : 'Unknown'
+    this.started = new Date().toISOString()
     this.plays = []
   }
 
@@ -87,8 +88,8 @@ export default class Game {
     return [
       '[Site "takbot"]',
       '[Event "Local Play"]',
-      `[Date "${new Date().toISOString().slice(0, 10)}"]`,
-      `[Time "${new Date().toISOString().slice(11)}"]`,
+      `[Date "${this.started.slice(0, 10).replaceAll('-', '.')}"]`,
+      `[Time "${this.started.slice(11, 19)}"]`,
       `[Player1 "${this.white}"]`,
       `[Player2 "${this.black}"]`,
       '[Clock "none"]',
