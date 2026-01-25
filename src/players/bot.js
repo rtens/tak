@@ -65,9 +65,10 @@ export default class Bot extends Player {
           play.apply(applied, color)
 
           const score = color == 'white'
-            ? this.minimax(true, applied, best, start, searched, depth)
-            : -this.minimax(false, applied, best, start, searched, depth)
+                ? this.minimax(true, applied, best, Infinity,  start, searched, depth)
+                : -this.minimax(false, applied, -Infinity, -best, start, searched, depth)
 
+          // console.log(depth, color, play.ptn(), score, best)
           debug.evals[depth].push([play.ptn(), score])
 
           if (score == best) plays.push(play)
@@ -87,7 +88,7 @@ export default class Bot extends Player {
     return chosen
   }
 
-  minimax(min, board, sofar, start, searched, depth) {
+  minimax(min, board, alpha, beta, start, searched, depth) {
     searched[depth] ||= 0
     searched[depth]++
 
@@ -101,20 +102,22 @@ export default class Bot extends Player {
     if (passed > this.think_time_ms) throw 'TIME_OUT'
 
     const color = min ? 'black' : 'white'
-    let best = min ? Infinity : -Infinity
     for (const play of this.legal_plays(board, color)) {
       const applied = board.clone()
       play.apply(applied, color)
 
-      const score = this.minimax(!min, applied, sofar, start, searched, depth - 1)
+      const score = this.minimax(!min, applied, alpha, beta, start, searched, depth - 1)
 
-      if (this.pruning && score < sofar) return score
+      // console.log(' '.repeat(this.level-depth), color, play.ptn(), score, alpha, beta)
 
-      if (min && score < best) best = score
-      if (!min && score > best) best = score
+      if (this.pruning && min && score <= alpha) return -Infinity
+      if (this.pruning && !min && score >= beta) return Infinity
+
+      if (min && score < beta) beta = score
+      if (!min && score > alpha) alpha = score
     }
 
-    return best
+    return min ? beta : alpha
   }
 
   evaluate(board) {

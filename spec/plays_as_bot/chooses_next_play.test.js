@@ -86,7 +86,7 @@ test('prevent white road', t => {
   t.is(play.ptn(), 'c1')
 })
 
-test.skip('prevent other white road', t => {
+test('prevent other white road', t => {
   const game = new Game(3)
   game.perform(parse('a1'))
   game.perform(parse('c3'))
@@ -97,7 +97,6 @@ test.skip('prevent other white road', t => {
   const bot = new Bot().at(1)
   const play = bot.play(game)
 
-  console.log(bot.debug[0].evals)
   t.is(play.ptn(), 'b3')
 })
 
@@ -112,6 +111,7 @@ test('prevent black road', t => {
   const bot = new Bot().at(1)
   bot.think_time_ms = 1000
   bot.random = () => 0
+  bot.pruning = false
 
   const play = bot.best_play(board, 'white')
 
