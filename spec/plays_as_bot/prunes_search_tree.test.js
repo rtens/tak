@@ -27,6 +27,6 @@ test('with pruning', t => {
   bot.best_play(board, 'white')
 
   t.is(bot.debug[0].searched[2][2], 18)
-  t.assert(bot.debug[0].searched[2][1] < 288)
+  t.is(bot.debug[0].searched[2][1], 288)
   t.assert(bot.debug[0].searched[2][0] < 4752)
 })

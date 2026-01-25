@@ -110,8 +110,8 @@ export default class Bot extends Player {
 
       // console.log(' '.repeat(this.level-depth), color, play.ptn(), score, alpha, beta)
 
-      if (this.pruning && min && score <= alpha) return -Infinity
-      if (this.pruning && !min && score >= beta) return Infinity
+      if (this.pruning && min && score < alpha) return -Infinity
+      if (this.pruning && !min && score > beta) return Infinity
 
       if (min && score < beta) beta = score
       if (!min && score > alpha) alpha = score
