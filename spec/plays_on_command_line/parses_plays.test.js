@@ -2,9 +2,6 @@ import test from 'ava'
 import Move from '../../src/model/move.js'
 import parse from '../../src/model/parse.js'
 import Place from '../../src/model/place.js'
-import Cli from '../../src/players/cli.js'
-import MockInterface from '../mock_interface.js'
-import Game from '../../src/model/game.js'
 
 test('place flat', t => {
   t.deepEqual(parse('a1'), Place.Flat.at(0, 0))

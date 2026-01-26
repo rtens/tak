@@ -1,4 +1,3 @@
-import Play from '../../src/model/play.js'
 import Place from '../../src/model/place.js'
 import Player from '../../src/player.js'
 import parse from '../../src/model/parse.js'
