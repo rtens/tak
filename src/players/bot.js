@@ -43,12 +43,18 @@ export default class Bot extends Player {
 
   best_play(board) {
     const timeout = new Date().getTime() + this.think_time_ms
+    const sorted = this.legal_plays(board)
 
     let chosen = null
     for (let depth = 0; depth <= this.level; depth++) {
       try {
-        const plays = this.best_plays(board, depth, timeout)
+        const plays = this.best_plays(board, depth, sorted, timeout)
         chosen = plays[Math.floor(this.random() * plays.length)]
+        sorted.sort((a, b) => {
+          if (plays.indexOf(a) > -1) return -1
+          if (plays.indexOf(b) > -1) return 1
+          return 0
+        })
       } catch (e) {
         if (e != 'TIME') throw e
       }
@@ -56,11 +62,11 @@ export default class Bot extends Player {
     return chosen
   }
 
-  best_plays(board, depth, timeout) {
+  best_plays(board, depth, sorted, timeout) {
     let plays = []
 
     let best = -Infinity
-    for (const play of this.legal_plays(board)) {
+    for (const play of sorted || this.legal_plays(board)) {
       const score = -this.search(
         board.applied(play),
         depth,
