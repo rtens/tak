@@ -3,7 +3,8 @@ import path from 'path'
 import readline from 'readline'
 
 export default class Interface {
-  constructor() {
+  constructor(args) {
+    this.args = args
     this.rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout
@@ -16,6 +17,10 @@ export default class Interface {
 
   async read(prompt) {
     process.stdout.write(prompt + ' ')
+    if (this.args.length) {
+      this.print(this.args[0])
+      return this.args.shift()
+    }
     return (await this.rl[Symbol.asyncIterator]().next()).value
   }
 
