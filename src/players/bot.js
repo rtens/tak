@@ -1,6 +1,7 @@
 import Coords from '../model/coords.js'
 import Move from '../model/move.js'
 import Place from '../model/place.js'
+import { Win } from '../model/result.js'
 import Player from '../player.js'
 
 export default class Bot extends Player {
@@ -37,146 +38,115 @@ export default class Bot extends Player {
       return new Place.Flat(empty_corner)
     }
 
-    return this.best_play(game.board, game.turn())
+    return this.best_play(game.board)
   }
 
-  best_play(board, color) {
-    const debug = {
-      searched: {},
-      evals: {},
-      chosen: {}
-    }
-    this.debug.push(debug)
-
-    const start = new Date().getTime()
+  best_play(board) {
+    const timeout = new Date().getTime() + this.think_time_ms
 
     let chosen = null
-
-    try {
-      for (let depth = 0; depth <= this.level; depth++) {
-        debug.evals[depth] = []
-        debug.searched[depth] = {}
-        const searched = debug.searched[depth]
-
-        let best = -Infinity
-        let plays = []
-        for (const play of this.legal_plays(board, color)) {
-          const applied = board.clone()
-          play.apply(applied, color)
-
-          const score = color == 'white'
-            ? this.minimax(true, applied, best, Infinity, start, searched, depth)
-            : -this.minimax(false, applied, -Infinity, -best, start, searched, depth)
-
-          // console.log(depth, color, play.ptn(), score, best)
-          debug.evals[depth].push([play.ptn(), score])
-
-          if (score == best) plays.push(play)
-          if (score > best) {
-            plays = [play]
-            best = score
-          }
-        }
-
+    for (let depth = 0; depth <= this.level; depth++) {
+      try {
+        const plays = this.best_plays(board, depth, timeout)
         chosen = plays[Math.floor(this.random() * plays.length)]
-        debug.chosen[depth] = chosen.ptn()
+      } catch (e) {
+        if (e != 'TIME') throw e
       }
-    } catch (e) {
-      if (e != 'TIME_OUT') throw e
     }
-
     return chosen
   }
 
-  minimax(min, board, alpha, beta, start, searched, depth) {
-    searched[depth] ||= 0
-    searched[depth]++
-
-    const evaluation = this.evaluate(board)
-    if (!depth) return evaluation
-
-    if (Math.abs(evaluation) > 900)
-      return evaluation + depth
-
-    const passed = new Date().getTime() - start
-    if (passed > this.think_time_ms) throw 'TIME_OUT'
-
-    const color = min ? 'black' : 'white'
-    for (const play of this.legal_plays(board, color)) {
-      const applied = board.clone()
-      play.apply(applied, color)
-
-      const score = this.minimax(!min, applied, alpha, beta, start, searched, depth - 1)
-
-      // console.log(' '.repeat(this.level-depth), color, play.ptn(), score, alpha, beta)
-
-      if (this.pruning && min && score < alpha) return -Infinity
-      if (this.pruning && !min && score > beta) return Infinity
-
-      if (min && score < beta) beta = score
-      if (!min && score > alpha) alpha = score
+  best_plays(board, depth, timeout) {
+    let plays = []
+    for (const play of this.legal_plays(board)) {
+      const score = -this.search(board.applied(play), depth, -10000, 10000, timeout)
+      // console.log(' ', board.turn, play.ptn(), score)
+      plays.push({ play, score })
     }
 
-    return min ? beta : alpha
+    // console.log(plays.map(p => [p.play.ptn(), p.score]))
+
+    const max = Math.max(...plays.map(p => p.score))
+    return plays
+      .filter(p => p.score == max)
+      .map(p => p.play)
+  }
+
+  search(board, depth, alpha, beta, timeout) {
+    if (timeout && new Date().getTime() > timeout)
+      throw 'TIME'
+
+    const game_over = board.game_over()
+    if (game_over instanceof Win)
+      return game_over.color == board.turn
+        ? 9000 + depth
+        : -9000 - depth
+
+    if (!depth) return this.evaluate(board)
+
+    for (const play of this.legal_plays(board)) {
+      const score = -this.search(board.applied(play), depth - 1, -beta, -alpha, timeout)
+      // console.log(depth, board.turn, play.ptn(), score, alpha, beta)
+      if (this.pruning && score >= beta) return beta
+      if (score > alpha) alpha = score
+    }
+    return alpha
   }
 
   evaluate(board) {
-    if (board.road('white')) return 9000
-    if (board.road('black')) return -9000
-
-    let evaluation = board.black.count() - board.white.count()
-
     const { white, black } = board.flat_count()
-    evaluation += (white - black) * 10
+    const evaluation = (white - black) * 10
+      + board.black.count()
+      - board.white.count()
 
-    if (board.finished())
-      return (white - black) * 1000
-
-    return evaluation
+    return board.turn == 'white'
+      ? evaluation
+      : -evaluation
   }
 
-  legal_plays(board, color) {
+  legal_plays(board) {
+    if (board.game_over()) return []
+
     const plays = []
-
-    if (board.finished()
-      || board.road('white')
-      || board.road('black')) return []
-
     for (const square of Object.values(board.squares)) {
       if (square.empty()) {
-        if (board[color].stones.length)
-          plays.push(
-            new Place.Flat(square.coords),
-            new Place.Wall(square.coords))
+        place(square)
 
-        if (board[color].caps.length)
-          plays.push(
-            new Place.Cap(square.coords))
-
-      } else if (square.top().color == color) {
+      } else if (square.top().color == board.turn) {
         for (const dir of Object.keys(Move.directions)) {
-          const max = square.pieces.length
-
-          for (let take = 1; take <= max; take++) {
-            const drops = spread([], take)
-
-            for (const dropped of drops) {
-              const move = new Move(square.coords).to(dir)
-              for (const drop of dropped) {
-                move.drop(drop)
-              }
-
-              try {
-                move.apply(board.clone(), color)
-                plays.push(move)
-              } catch { }
-            }
-          }
+          move(square, dir)
         }
       }
     }
 
     return plays
+
+    function move(square, dir) {
+      const max = square.pieces.length
+      for (let take = 1; take <= max; take++) {
+        for (const dropped of spread([], take)) {
+          const move = new Move(square.coords)
+            .to(dir)
+            .dropping(dropped)
+
+          try {
+            board.applied(move)
+            plays.push(move)
+          } catch { }
+        }
+      }
+    }
+
+    function place(square) {
+      if (board[board.turn].stones.length)
+        plays.push(
+          new Place.Flat(square.coords),
+          new Place.Wall(square.coords))
+
+      if (board[board.turn].caps.length)
+        plays.push(
+          new Place.Cap(square.coords))
+    }
 
     function spread(drops, last) {
       if (!last) return [drops]

@@ -8,62 +8,53 @@ test('empty board', t => {
   const board = new Board(5)
 
   t.is(new Bot().evaluate(board), 0)
+  board.turn = 'black'
+  t.is(new Bot().evaluate(board), -0)
 })
 
-test('white more flats', t => {
+test('more flats more better', t => {
   const board = new Board(5)
   stack(board, 'a1', new Stone('white'))
 
   t.is(new Bot().evaluate(board), 10)
+  board.turn = 'black'
+  t.is(new Bot().evaluate(board), -10)
 })
 
-test('black more flats', t => {
+test('negative flats diff', t => {
   const board = new Board(5)
+
   stack(board, 'a1', new Stone('white'))
   stack(board, 'a2', new Stone('black'))
   stack(board, 'a3', new Stone('black'))
   stack(board, 'a4', new Stone('black'))
 
   t.is(new Bot().evaluate(board), -20)
+  board.turn = 'black'
+  t.is(new Bot().evaluate(board), 20)
 })
 
-test('white lower on stash', t => {
+test('less stash more better', t => {
   const board = new Board(5)
   board.white.take_flat()
 
   t.is(new Bot().evaluate(board), 1)
+  board.turn = 'black'
+  t.is(new Bot().evaluate(board), -1)
 })
 
-test('black lower on stash', t => {
+test('negative stash diff', t => {
   const board = new Board(5)
+  board.turn = 'white'
+
   board.white.take_flat()
   board.black.take_flat()
   board.black.take_flat()
   board.black.take_flat()
 
   t.is(new Bot().evaluate(board), -2)
-})
-
-test('white has road', t => {
-  const board = new Board(5)
-  stack(board, 'a1', new Stone('white'))
-  stack(board, 'a2', new Stone('white'))
-  stack(board, 'a3', new Stone('white'))
-  stack(board, 'a4', new Stone('white'))
-  stack(board, 'a5', new Stone('white'))
-
-  t.is(new Bot().evaluate(board), 9000)
-})
-
-test('black has road', t => {
-  const board = new Board(5)
-  stack(board, 'a1', new Stone('black'))
-  stack(board, 'a2', new Stone('black'))
-  stack(board, 'a3', new Stone('black'))
-  stack(board, 'a4', new Stone('black'))
-  stack(board, 'a5', new Stone('black'))
-
-  t.is(new Bot().evaluate(board), -9000)
+  board.turn = 'black'
+  t.is(new Bot().evaluate(board), 2)
 })
 
 function stack(board, fr, ...pieces) {

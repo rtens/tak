@@ -65,7 +65,7 @@ test('out of walls', t => {
   t.is(error.message, 'No stones left')
 })
 
-test('out of capstones', t => {
+test('out of caps', t => {
   const game = new Game(3)
   game.perform(Place.Flat.at(0, 0))
   game.perform(Place.Flat.at(1, 0))
@@ -75,7 +75,7 @@ test('out of capstones', t => {
   const error = t.throws(() =>
     game.perform(Place.Cap.at(2, 0)))
 
-  t.is(error.message, 'No capstones left')
+  t.is(error.message, 'No caps left')
 })
 
 test('first play not place flat', t => {

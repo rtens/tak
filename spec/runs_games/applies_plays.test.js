@@ -15,11 +15,11 @@ test('place start flats', t => {
 
   for (const [coords, square] of Object.entries(game.board.squares)) {
     if (coords == 'a1')
-      t.like(square.pieces, [new Stone('black')])
+      t.deepEqual(square.pieces, [new Stone('black')])
     else if (coords == 'c3')
-      t.like(square.pieces, [new Stone('white')])
+      t.deepEqual(square.pieces, [new Stone('white')])
     else
-      t.like(square.pieces, [undefined])
+      t.deepEqual(square.pieces, [])
   }
 })
 

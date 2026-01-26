@@ -10,7 +10,7 @@ test('empty board', t => {
   const board = new Board(5)
 
   const plays = new Bot()
-    .legal_plays(board, 'white')
+    .legal_plays(board)
 
   t.is(plays.length, 25 * 3)
   t.like(plays.map(p => p.ptn()), [
@@ -24,7 +24,7 @@ test('no stones', t => {
   board.white.stones = []
 
   const plays = new Bot()
-    .legal_plays(board, 'white')
+    .legal_plays(board)
 
   t.is(plays.length, 25)
   t.like(plays.map(p => p.ptn()), [
@@ -32,12 +32,12 @@ test('no stones', t => {
   ])
 })
 
-test('no capstones', t => {
+test('no caps', t => {
   const board = new Board(5)
   board.white.caps = []
 
   const plays = new Bot()
-    .legal_plays(board, 'white')
+    .legal_plays(board)
 
   t.is(plays.length, 25 * 2)
   t.like(plays.map(p => p.ptn()), [
@@ -47,10 +47,11 @@ test('no capstones', t => {
 
 test('occupied square', t => {
   const board = new Board(3)
-  parse('a1').apply(board, 'white')
+  board.squares['a1'].stack(new Stack([
+    new Stone('black')]))
 
   const plays = new Bot()
-    .legal_plays(board, 'black')
+    .legal_plays(board)
 
   t.is(plays.length, 8 * 2)
   t.like(plays.map(p => p.ptn()), [
@@ -60,10 +61,11 @@ test('occupied square', t => {
 
 test('single piece', t => {
   const board = new Board(3)
-  parse('b2').apply(board, 'white')
+  board.squares['b2'].stack(new Stack([
+    new Stone('white')]))
 
   const plays = new Bot()
-    .legal_plays(board, 'white')
+    .legal_plays(board)
 
   t.deepEqual(plays
     .filter(p => p instanceof Move)
@@ -75,12 +77,15 @@ test('single piece', t => {
 
 test('limited directions', t => {
   const board = new Board(3)
-  parse('b2').apply(board, 'white')
-  parse('Sc2').apply(board, 'black')
-  parse('Sb3').apply(board, 'black')
+  board.squares['b2'].stack(new Stack([
+    new Stone('white')]))
+  board.squares['c2'].stack(new Stack([
+    new Stone('black').stand()]))
+  board.squares['b3'].stack(new Stack([
+    new Stone('black').stand()]))
 
   const plays = new Bot()
-    .legal_plays(board, 'white')
+    .legal_plays(board)
 
   t.deepEqual(plays
     .filter(p => p instanceof Move)
@@ -99,7 +104,7 @@ test('lonely stack', t => {
   ]))
 
   const plays = new Bot()
-    .legal_plays(board, 'white')
+    .legal_plays(board)
 
   for (const d of Object.keys(Move.directions))
     t.deepEqual(plays
@@ -126,7 +131,7 @@ test('small board', t => {
   ]))
 
   const plays = new Bot()
-    .legal_plays(board, 'white')
+    .legal_plays(board)
 
   t.deepEqual(plays
     .filter(p => p instanceof Move)
@@ -156,7 +161,7 @@ test('walled off', t => {
   ]))
 
   const plays = new Bot()
-    .legal_plays(board, 'white')
+    .legal_plays(board)
 
   t.deepEqual(plays
     .filter(p => p instanceof Move)
@@ -184,7 +189,7 @@ test('carry limit', t => {
   ]))
 
   const plays = new Bot()
-    .legal_plays(board, 'white')
+    .legal_plays(board)
 
   t.deepEqual(plays
     .filter(p => p instanceof Move)
@@ -204,10 +209,12 @@ test('full board', t => {
   const board = new Board(3);
 
   ['a1', 'a2', 'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3']
-    .forEach((c, i) => parse(c).apply(board, i % 2 ? 'white' : 'black'))
+    .forEach((c, i) =>
+      board.squares[c].stack(new Stack([
+        new Stone(i % 2 ? 'white' : 'black')])))
 
   const plays = new Bot()
-    .legal_plays(board, 'white')
+    .legal_plays(board)
 
   t.is(plays.length, 0)
 })
@@ -216,10 +223,12 @@ test('white road', t => {
   const board = new Board(3);
 
   ['a1', 'b1', 'c1']
-    .forEach(c => parse(c).apply(board, 'white'))
+    .forEach((c, i) =>
+      board.squares[c].stack(new Stack([
+        new Stone('white')])))
 
   const plays = new Bot()
-    .legal_plays(board, 'white')
+    .legal_plays(board)
 
   t.is(plays.length, 0)
 })
@@ -228,10 +237,13 @@ test('black road', t => {
   const board = new Board(3);
 
   ['a1', 'b1', 'c1']
-    .forEach(c => parse(c).apply(board, 'black'))
+    .forEach((c, i) =>
+      board.squares[c].stack(new Stack([
+        new Stone('black')])))
 
+  board.turn = 'black'
   const plays = new Bot()
-    .legal_plays(board, 'black')
+    .legal_plays(board)
 
   t.is(plays.length, 0)
 })

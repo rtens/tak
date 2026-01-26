@@ -12,7 +12,7 @@ export class Draw extends Result {
   }
 }
 
-class Win extends Result {
+export class Win extends Result {
 
   constructor(color) {
     super()

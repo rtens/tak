@@ -16,13 +16,13 @@ export default class Runner {
     const game = await this.start_game(players)
 
     while (!game.result()) {
-      const player = players[game.turn()]
-      this.interface.print(`${player.name()}'s turn (${game.turn()})`)
+      const player = players[game.board.turn]
+      this.interface.print(`${player.name()}'s turn (${game.board.turn})`)
 
       const play = await player.play(game.clone())
 
       if (!play) {
-        game.forfeit(game.turn())
+        game.forfeit(game.board.turn)
 
       } else {
         this.interface.print(`${player.name()} plays ${play.ptn()}`)

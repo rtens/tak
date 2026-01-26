@@ -1,61 +1,66 @@
 import test from 'ava'
 import Bot from '../../src/players/bot.js'
-import Board from '../../src/model/board.js'
+import Game from '../../src/model/game.js'
 import Stack from '../../src/model/stack.js'
 import { Stone } from '../../src/model/piece.js'
+import parse from '../../src/model/parse.js'
 
 test('limited time', t => {
-  const board = new Board(3)
+  const game = new Game(3)
 
   const bot = new Bot().at(4)
   bot.think_time_ms = 100
-  bot.random = () => 0
 
   const start = new Date().getTime()
-  bot.best_play(board, 'white')
+  const play = bot.best_play(game.board)
   const time = new Date().getTime() - start
 
-  t.assert(time < 110)
+  t.assert(time < 110, 'Took ' + time + 'ms')
+  t.assert(play != null)
 })
 
 test('finishes road', t => {
-  const board = new Board(3)
-  board.squares['a3'].stack(new Stack([new Stone('white')]))
-  board.squares['b3'].stack(new Stack([new Stone('white')]))
-  board.squares['b1'].stack(new Stack([
+  const game = new Game(3)
+  game.perform(parse('b1'))
+  game.perform(parse('a3'))
+
+  game.board.squares['a3'].stack(new Stack([new Stone('white')]))
+  game.board.squares['b3'].stack(new Stack([new Stone('white')]))
+  game.board.squares['b1'].stack(new Stack([
     new Stone('black'),
     new Stone('black'),
     new Stone('black'),
   ]))
-  board.squares['c1'].stack(new Stack([
+  game.board.squares['c1'].stack(new Stack([
     new Stone('black'),
     new Stone('black'),
     new Stone('black'),
   ]))
-  board.squares['c2'].stack(new Stack([
+  game.board.squares['c2'].stack(new Stack([
     new Stone('black'),
     new Stone('black'),
     new Stone('black'),
   ]))
 
   const bot = new Bot().at(4)
-  bot.think_time_ms = 100
+  bot.think_time_ms = 10
   bot.random = () => 0
 
-  const play = bot.best_play(board, 'white')
+  const play = bot.best_play(game.board)
 
   t.is(play.ptn(), 'c3')
 })
 
 test('prevents road', t => {
-  const board = new Board(3)
-  board.squares['a3'].stack(new Stack([new Stone('white')]))
-  board.squares['c3'].stack(new Stack([new Stone('white')]))
+  const game = new Game(3)
+  game.perform(parse('a1'))
+  game.perform(parse('a3'))
+  game.perform(parse('c3'))
 
-  const bot = new Bot().at(3)
+  const bot = new Bot().at(4)
   bot.think_time_ms = 100
   bot.random = () => 0
-  const play = bot.best_play(board, 'black')
+  const play = bot.best_play(game.board)
 
   t.is(play.ptn(), 'b3')
 })

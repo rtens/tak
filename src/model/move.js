@@ -24,6 +24,11 @@ export default class Move extends Play {
     return this
   }
 
+  dropping(drops) {
+    this.drops = drops
+    return this
+  }
+
   up() {
     return this.to('+')
   }

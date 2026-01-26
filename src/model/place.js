@@ -49,7 +49,7 @@ Place.Wall = class extends Place {
 Place.Cap = class extends Place {
 
   take_piece(stash) {
-    return stash.take_capstone()
+    return stash.take_cap()
   }
 
   prefix() {

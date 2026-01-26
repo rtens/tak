@@ -3,10 +3,28 @@ import Stack from './stack.js'
 
 export default class Stash {
 
-  constructor(color, stones, caps = 0) {
-    this.color = color
-    this.stones = [...Array(stones)].map(() => new Stone(color))
-    this.caps = [...Array(caps)].map(() => new Cap(color))
+  constructor() {
+    this.stones = []
+    this.caps = []
+  }
+
+  starting(color, stones, caps) {
+    const opponent = color == 'white' ? 'black' : 'white'
+    this.add_stones(color, stones - 1)
+    this.add_stones(opponent, 1)
+    this.add_caps(color, caps)
+
+    return this
+  }
+
+  add_stones(color, number) {
+    for (let n = 0; n < number; n++)
+      this.stones.push(new Stone(color))
+  }
+
+  add_caps(color, number) {
+    for (let n = 0; n < number; n++)
+      this.caps.push(new Cap(color))
   }
 
   take_flat() {
@@ -17,16 +35,16 @@ export default class Stash {
   }
 
   take_wall() {
-    if (!this.stones.length) {
+    if (!this.stones.length)
       throw new Error('No stones left')
-    }
+
     return Stack.of(this.stones.pop().stand())
   }
 
-  take_capstone() {
-    if (!this.caps.length) {
-      throw new Error('No capstones left')
-    }
+  take_cap() {
+    if (!this.caps.length)
+      throw new Error('No caps left')
+
     return Stack.of(this.caps.pop())
   }
 
@@ -45,9 +63,9 @@ export default class Stash {
   }
 
   clone() {
-    return new Stash(
-      this.color,
-      this.stones.length,
-      this.caps.length)
+    const stash = new Stash()
+    stash.stones = this.stones.map(s => s.clone())
+    stash.caps = this.caps.map(c => c.clone())
+    return stash
   }
 }

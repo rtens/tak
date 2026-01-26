@@ -3,14 +3,23 @@ import Move from './move.js'
 import Square from './square.js'
 import Stash from './stash.js'
 import { Cap, Stone } from '../model/piece.js'
+import { Draw, FlatWin, RoadWin } from './result.js'
 
 export default class Board {
 
   constructor(size) {
     this.size = size
-    this.white = new Stash('white', stones[size], capstones[size])
-    this.black = new Stash('black', stones[size], capstones[size])
+    this.turn = 'white'
+    this.white = new Stash().starting('white', stones[size], caps[size])
+    this.black = new Stash().starting('black', stones[size], caps[size])
     this.squares = this.init_squares()
+  }
+
+  next() {
+    if (this.turn == 'white')
+      this.turn = 'black'
+    else
+      this.turn = 'white'
   }
 
   init_squares() {
@@ -30,19 +39,48 @@ export default class Board {
     return square
   }
 
-  full() {
-    return !Object.values(this.squares).find(s => s.empty())
+  applied(play) {
+    const clone = this.clone()
+    play.apply(clone, this.turn)
+    clone.next()
+    return clone
+  }
+
+  game_over() {
+    if (this.road('white'))
+      return new RoadWin('white')
+
+    if (this.road('black'))
+      return new RoadWin('black')
+
+    if (this.finished()) {
+      const { white, black } = this.flat_count()
+
+      if (white > black) {
+        return new FlatWin('white')
+      } else if (black > white) {
+        return new FlatWin('black')
+      } else {
+        return new Draw()
+      }
+    }
+
+    return null
   }
 
   finished() {
     return this.full()
       || !this.white.count()
       || !this.black.count()
+  }
 
+  full() {
+    return !Object.values(this.squares).find(s => s.empty())
   }
 
   clone() {
     const board = new Board(this.size)
+    board.turn = this.turn
     board.white = this.white.clone()
     board.black = this.black.clone()
     board.squares = Object.entries(this.squares)
@@ -176,7 +214,7 @@ const stones = {
   8: 50
 }
 
-const capstones = {
+const caps = {
   3: 0,
   4: 0,
   5: 1,

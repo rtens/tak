@@ -1,6 +1,6 @@
 import Board from './board.js'
 import Place from './place.js'
-import { Draw, FlatWin, Forfeit, RoadWin } from './result.js'
+import { Forfeit } from './result.js'
 
 export default class Game {
 
@@ -17,52 +17,17 @@ export default class Game {
   }
 
   result() {
-    if (this.forfeited) {
+    if (this.forfeited)
       return new Forfeit(this.forfeited)
-    }
 
-    if (this.board.road('white')) {
-      return new RoadWin('white')
-    }
-    if (this.board.road('black')) {
-      return new RoadWin('black')
-    }
-
-    if (this.board.finished()) {
-      const { white, black } = this.board.flat_count()
-
-      if (white > black) {
-        return new FlatWin('white')
-      } else if (black > white) {
-        return new FlatWin('black')
-      } else {
-        return new Draw()
-      }
-    }
-  }
-
-  turn() {
-    return this.plays.length % 2 == 0
-      ? 'white'
-      : 'black'
+    return this.board.game_over()
   }
 
   perform(play) {
-    let color = this.turn()
+    if (this.plays.length < 2 && !(play instanceof Place.Flat))
+      throw new Error('First two plays must place flats')
 
-    if (this.plays.length < 2) {
-      if (!(play instanceof Place.Flat)) {
-        throw new Error('First two plays must place flats')
-      }
-
-      color = this.plays.length
-        ? 'white'
-        : 'black'
-    }
-
-    const clone = this.board.clone()
-    play.apply(clone, color)
-    this.board = clone
+    this.board = this.board.applied(play)
     this.plays.push(play)
   }
 
