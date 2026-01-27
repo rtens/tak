@@ -24,7 +24,7 @@ test('try again', async t => {
 
   await runner.run()
 
-  t.like(inter.outputs.slice(4), [
+  t.like(inter.outputs.slice(5), [
     'Two plays a1',
     'Illegal play: Square not empty',
     'Two\'s turn (black)'

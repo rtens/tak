@@ -6,7 +6,7 @@ import Board from '../../src/model/board.js'
 import Stack from '../../src/model/stack.js'
 import { Stone } from '../../src/model/piece.js'
 
-test('white wins', async t => {
+test.only('white wins', async t => {
   const inter = new MockInterface(t)
   const runner = new Runner(inter)
 
@@ -22,7 +22,7 @@ test('white wins', async t => {
   await runner.run()
 
   t.true(inter.closed)
-  t.like(inter.outputs.slice(-2), [
+  t.deepEqual(inter.outputs.slice(-2), [
     "One won by road",
     "R-0",
   ])

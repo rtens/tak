@@ -27,20 +27,22 @@ export default class Bot extends Player {
   }
 
   play(game) {
-    if (game.plays.length < 2) {
-      const s = game.board.size - 1
-      const corners = [
-        new Coords(0, 0),
-        new Coords(s, s),
-      ]
-
-      const empty_corner = corners.find(c =>
-        game.board.square(c).empty())
-
-      return new Place.Flat(empty_corner)
-    }
+    if (game.plays.length < 2)
+      return this.opening_play(game)
 
     return this.best_play(game.board)
+  }
+
+  opening_play(game) {
+    const s = game.board.size - 1
+    const corners = [
+      new Coords(0, 0),
+      new Coords(s, s),
+    ]
+
+    const empty_corner = corners.find(c => game.board.square(c).empty())
+
+    return new Place.Flat(empty_corner)
   }
 
   best_play(board) {
@@ -140,6 +142,17 @@ export default class Bot extends Player {
 
     return plays
 
+    function place(square) {
+      if (board[board.turn].stones.length)
+        plays.push(
+          new Place.Flat(square.coords),
+          new Place.Wall(square.coords))
+
+      if (board[board.turn].caps.length)
+        plays.push(
+          new Place.Cap(square.coords))
+    }
+
     function move(square, dir) {
       const max = square.pieces.length
       for (let take = 1; take <= max; take++) {
@@ -154,17 +167,6 @@ export default class Bot extends Player {
           } catch { }
         }
       }
-    }
-
-    function place(square) {
-      if (board[board.turn].stones.length)
-        plays.push(
-          new Place.Flat(square.coords),
-          new Place.Wall(square.coords))
-
-      if (board[board.turn].caps.length)
-        plays.push(
-          new Place.Cap(square.coords))
     }
 
     function spread(drops, last) {

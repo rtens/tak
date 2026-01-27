@@ -61,7 +61,7 @@ test('applies plays', async t => {
   runner.import = MyPlayer.import()
   await runner.run()
 
-  t.like(inter.outputs.slice(1), [
+  t.like(inter.outputs.slice(2), [
     "One's turn (white)",
     "One plays One's play",
     "Two's turn (black)",

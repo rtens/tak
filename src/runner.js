@@ -94,7 +94,7 @@ export default class Runner {
       this.interface.print(`${players[result.by].name()} forfeits`)
     }
 
-    this.interface.print(this.interface.colored('red', result.ptn()) + '\n')
+    this.interface.print(this.interface.colored('red', result.ptn()))
 
     this.interface.save(
       'games/' + game.started.slice(0, 19).replace(/\D/g, '_'),
