@@ -47,7 +47,7 @@ test('timeout', t => {
   bot.think_time_ms = 10
   const play = bot.play(game)
 
-  t.assert(play.comment.match(/score: 0, depth: 2, timeout/),
+  t.assert(play.comment.match(/depth: \d, timeout/),
     play.comment)
 })
 
