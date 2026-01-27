@@ -27,7 +27,7 @@ test('white prefers flats', t => {
   const plays = new Bot().best_plays(game.board, 0)
 
   t.deepEqual(plays.map(p => p.ptn()), [
-    'a3', 'b2'
+    'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3',
   ])
 })
 
@@ -77,7 +77,7 @@ test('prevent white road', t => {
   const plays = new Bot().best_plays(game.board, 1)
 
   t.deepEqual(plays.map(p => p.ptn()), [
-    'a2-'
+    'c1'
   ])
 })
 

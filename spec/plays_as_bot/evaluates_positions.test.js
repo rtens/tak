@@ -68,7 +68,7 @@ test('the longer chains the better', t => {
 
   t.is(new Bot().evaluate(board), 90)
   board.turn = 'black'
-  t.is(new Bot().evaluate(board), -90)
+  t.is(new Bot().evaluate(board), -50)
 })
 
 function stack(board, fr, ...pieces) {

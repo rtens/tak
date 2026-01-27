@@ -131,7 +131,7 @@ export default class Bot extends Player {
 
     const stash_diff = board.black.count() - board.white.count()
 
-    const chains = board.chains('white')
+    const chains = board.chains(board.turn)
       .filter(c => c.length > 1)
       .reduce((sum, c) => sum + c.length, 0)
 
