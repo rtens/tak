@@ -12,6 +12,7 @@ Make all sizes fun and challenging but winnable.
 - tweak evaluation
   - chains
   - tak
+- speed up search
 
 ### General stuff
 - starting plays in legal plays
