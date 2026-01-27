@@ -25,9 +25,9 @@ test('negative flats diff', t => {
   const board = new Board(5)
 
   stack(board, 'a1', new Stone('white'))
-  stack(board, 'a2', new Stone('black'))
-  stack(board, 'a3', new Stone('black'))
-  stack(board, 'a4', new Stone('black'))
+  stack(board, 'b2', new Stone('black'))
+  stack(board, 'c3', new Stone('black'))
+  stack(board, 'd4', new Stone('black'))
 
   t.is(new Bot().evaluate(board), -20)
   board.turn = 'black'
@@ -55,6 +55,20 @@ test('negative stash diff', t => {
   t.is(new Bot().evaluate(board), -2)
   board.turn = 'black'
   t.is(new Bot().evaluate(board), 2)
+})
+
+test('the longer chains the better', t => {
+  const board = new Board(5)
+
+  stack(board, 'a1', new Stone('white'))
+  stack(board, 'a2', new Stone('white'))
+  stack(board, 'b2', new Stone('white'))
+  stack(board, 'c2', new Stone('white'))
+  stack(board, 'e5', new Stone('white'))
+
+  t.is(new Bot().evaluate(board), 90)
+  board.turn = 'black'
+  t.is(new Bot().evaluate(board), -90)
 })
 
 function stack(board, fr, ...pieces) {

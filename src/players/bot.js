@@ -127,9 +127,17 @@ export default class Bot extends Player {
 
   evaluate(board) {
     const { white, black } = board.flat_count()
-    const evaluation = (white - black) * 10
-      + board.black.count()
-      - board.white.count()
+    const flat_diff = (white - black)
+
+    const stash_diff = board.black.count() - board.white.count()
+
+    const chains = board.chains('white')
+      .filter(c => c.length > 1)
+      .reduce((sum, c) => sum + c.length, 0)
+
+    const evaluation = stash_diff
+      + flat_diff * 10
+      + chains * 10
 
     return board.turn == 'white'
       ? evaluation

@@ -27,7 +27,7 @@ test('white prefers flats', t => {
   const plays = new Bot().best_plays(game.board, 0)
 
   t.deepEqual(plays.map(p => p.ptn()), [
-    'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3'
+    'a3', 'b2'
   ])
 })
 
@@ -37,7 +37,7 @@ test('black prefers flats', t => {
   const plays = new Bot().best_plays(game.board, 0)
 
   t.deepEqual(plays.map(p => p.ptn()), [
-    'b1', 'b2', 'b3', 'c1', 'c2', 'c3'
+    'a1+'
   ])
 })
 
@@ -67,7 +67,7 @@ test('level 0 does not see tak', t => {
   const plays = new Bot().best_plays(game.board, 0)
 
   t.deepEqual(plays.map(p => p.ptn()), [
-    'a3', 'b1', 'b3', 'c1', 'c2', 'c3'
+    'a1+'
   ])
 })
 
@@ -77,7 +77,7 @@ test('prevent white road', t => {
   const plays = new Bot().best_plays(game.board, 1)
 
   t.deepEqual(plays.map(p => p.ptn()), [
-    'c1'
+    'a2-'
   ])
 })
 

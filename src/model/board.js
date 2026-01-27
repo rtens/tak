@@ -109,47 +109,19 @@ export default class Board {
     return counts
   }
 
-  road(color) {
-    const squares = {}
-    for (const coords in this.squares) {
-      squares[coords] = this.squares[coords]
-    }
-
+  chains(color) {
     const checked = {}
 
-    const neighbors = square =>
-      Object.values(Move.directions)
-        .map(dir => square.coords.moved(dir).name())
-        .filter(n => n in this.squares)
+    return Object.values(this.squares)
+      .map(square =>
+        this.build_chain(square, color, checked))
+      .filter(chain => chain.length)
+  }
 
-    const build_chain = (chain, square, color) => {
-      const c = square.coords.name()
-
-      if (c in checked) {
-        return
-      }
-
-      const top = square.top()
-      if (square.empty() || top.standing) {
-        checked[c] = true
-        return
-      }
-
-      if (top.color != color) {
-        return
-      }
-
-      checked[c] = true
-      chain.push(square)
-
-      for (const n of neighbors(square)) {
-        build_chain(chain, this.squares[n], color)
-      }
-    }
-
-    for (const square of Object.values(squares)) {
-      const chain = []
-      build_chain(chain, square, color)
+  road(color) {
+    const checked = {}
+    for (const square of Object.values(this.squares)) {
+      const chain = this.build_chain(square, color, checked)
       if (chain.length < this.size) continue
 
       const files = chain.map(s => s.coords.file)
@@ -162,6 +134,31 @@ export default class Board {
     }
 
     return null
+  }
+
+  build_chain(square, color, checked) {
+    const c = square.coords.name()
+
+    if (c in checked)
+      return []
+
+    checked[c] = true
+
+    const top = square.top()
+    if (square.empty() || top.standing || top.color != color)
+      return []
+
+    const chain = [square]
+
+    const neighbors = Object.values(Move.directions)
+      .map(dir => square.coords.moved(dir).name())
+      .filter(n => n in this.squares)
+
+    for (const n of neighbors) {
+      chain.push(...this.build_chain(this.squares[n], color, checked))
+    }
+
+    return chain
   }
 
   print() {
