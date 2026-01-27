@@ -42,31 +42,37 @@ export default class Bot extends Player {
 
     const empty_corner = corners.find(c => game.board.square(c).empty())
 
-    return new Place.Flat(empty_corner)
+    return new Place.Flat(empty_corner).commented('opening')
   }
 
   best_play(board) {
-    const timeout = new Date().getTime() + this.think_time_ms
+    const start = new Date().getTime()
+    const timeout = start + this.think_time_ms
     const sorted = this.legal_plays(board)
+    const info = { searched: 0 }
 
     let chosen = null
-    for (let depth = 0; depth <= this.level; depth++) {
-      try {
-        const plays = this.best_plays(board, depth, sorted, timeout)
+    try {
+      for (let depth = 0; depth <= this.level; depth++) {
+        const plays = this.best_plays(board, depth, sorted, timeout, info)
         chosen = plays[Math.floor(this.random() * plays.length)]
+        chosen.comment += `, depth: ${depth}, candidates: ${plays.map(p => p.ptn())}`
         sorted.sort((a, b) => {
           if (plays.indexOf(a) > -1) return -1
           if (plays.indexOf(b) > -1) return 1
           return 0
         })
-      } catch (e) {
-        if (e != 'TIME') throw e
       }
+    } catch (e) {
+      if (e != 'TIME') throw e
+      chosen.comment += ', timeout'
     }
+
+    chosen.comment += `, searched ${info.searched} in ${(new Date().getTime() - start)}ms`
     return chosen
   }
 
-  best_plays(board, depth, sorted, timeout) {
+  best_plays(board, depth, sorted, timeout, info) {
     let plays = []
 
     let best = -Infinity
@@ -76,7 +82,10 @@ export default class Bot extends Player {
         depth,
         best,
         Infinity,
-        timeout)
+        timeout,
+        info)
+
+      play.comment = `score: ${score}`
 
       if (score == best) plays.push(play)
       if (score > best) {
@@ -88,7 +97,9 @@ export default class Bot extends Player {
     return plays
   }
 
-  search(board, depth, alpha, beta, timeout) {
+  search(board, depth, alpha, beta, timeout, info) {
+    if (info) info.searched++
+
     if (timeout && new Date().getTime() > timeout)
       throw 'TIME'
 
@@ -106,7 +117,8 @@ export default class Bot extends Player {
         depth - 1,
         -beta,
         -alpha,
-        timeout)
+        timeout,
+        info)
 
       if (this.pruning && score >= beta) return beta
       if (score > alpha) alpha = score

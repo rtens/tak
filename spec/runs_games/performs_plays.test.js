@@ -162,3 +162,31 @@ test('black forfeits', async t => {
     '1-0'
   ])
 })
+
+test('prints comments', async t => {
+  const inter = new MockInterface(t)
+  const runner = new Runner(inter)
+
+  class MyPlayer extends MockPlayer {
+    play(game) {
+      return super.play(game)
+        .commented('Comment by ' + this.name())
+    }
+  }
+
+  inter.answer("Player 1:", "foo One")
+  inter.answer("Player 2:", "foo Two")
+  inter.answer("Who is white? (1, 2, [r]andom)", "1")
+
+  runner.import = MyPlayer.import()
+  await runner.run()
+
+  t.like(inter.outputs.slice(2), [
+    "One's turn (white)",
+    "One plays a1",
+    "-- Comment by One",
+    "Two's turn (black)",
+    "Two plays b1",
+    "-- Comment by Two"
+  ])
+})

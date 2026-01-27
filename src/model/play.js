@@ -4,10 +4,16 @@ export default class Play {
 
   constructor(coords) {
     this.coords = coords
+    this.comment = ''
   }
 
   static at(file, rank) {
     return new this(new Coords(file, rank))
+  }
+
+  commented(comment) {
+    this.comment = comment
+    return this
   }
 
   apply(_board, _color) {

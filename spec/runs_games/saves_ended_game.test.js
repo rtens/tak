@@ -46,3 +46,43 @@ test('save game ptn', async t => {
       `F-0`
   }])
 })
+
+test('print comments', async t => {
+  const inter = new MockInterface(t)
+  const runner = new Runner(inter)
+
+  let i = 1
+  runner.import = class extends MockPlayer {
+    play(game) {
+      return super.play(game)
+        .commented('Play ' + i++)
+    }
+  }.import()
+
+  inter.answer("Player 1:", "foo One")
+  inter.answer("Player 2:", "foo Two")
+  inter.answer("Who is white? (1, 2, [r]andom)", "1")
+  inter.answer("Board size: (3-8 [5])", "3")
+
+  await runner.run()
+
+  t.like(inter.saved, [{
+    content:
+      `[Site "takbot"]` + '\n' +
+      `[Event "Local Play"]` + '\n' +
+      `[Date "2020.12.13"]` + '\n' +
+      `[Time "14:15:16"]` + '\n' +
+      `[Player1 "One"]` + '\n' +
+      `[Player2 "Two"]` + '\n' +
+      `[Clock "none"]` + '\n' +
+      `[Result "F-0"]` + '\n' +
+      `[Size "3"]` + '\n' +
+      `` + '\n' +
+      `1. a1 b1 {Play 1; Play 2}` + '\n' +
+      `2. c1 a2 {Play 3; Play 4}` + '\n' +
+      `3. b2 c2 {Play 5; Play 6}` + '\n' +
+      `4. a3 b3 {Play 7; Play 8}` + '\n' +
+      `5. c3 {Play 9}` + '\n' +
+      `F-0`
+  }])
+})

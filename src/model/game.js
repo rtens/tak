@@ -41,9 +41,17 @@ export default class Game {
   ptn() {
     const turns = []
     for (let p = 0; p < this.plays.length; p += 2) {
+      const white = this.plays[p]
+      const black = this.plays[p + 1]
+
       const parts = [turns.length + 1 + '.']
-      parts.push(this.plays[p].ptn())
-      if (this.plays[p + 1]) parts.push(this.plays[p + 1].ptn())
+      parts.push(white.ptn())
+      if (black) parts.push(black.ptn())
+
+      const comments = []
+      if (white.comment) comments.push(white.comment)
+      if (black && black.comment) comments.push(black.comment)
+      if (comments.length) parts.push(`{${comments.join('; ')}}`)
       turns.push(parts.join(' '))
     }
 

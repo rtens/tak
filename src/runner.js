@@ -29,6 +29,7 @@ export default class Runner {
       } else {
         const color = game.board.turn == 'white' ? 'yellow' : 'green'
         this.interface.print(`${player.name()} plays ${this.interface.colored(color, play.ptn())}`)
+        if (play.comment) this.interface.print('-- ' + play.comment)
 
         try {
           game.perform(play)
