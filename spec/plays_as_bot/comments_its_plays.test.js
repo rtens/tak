@@ -35,7 +35,7 @@ test('level 0 does not see tak', t => {
   bot.level = 0
   const play = bot.play(game)
 
-  t.assert(play.comment.match(/10@0 \d+ms \d+\/s/),
+  t.assert(play.comment.match(/0@0 \d+ms \d+\/s/),
     play.comment)
 })
 

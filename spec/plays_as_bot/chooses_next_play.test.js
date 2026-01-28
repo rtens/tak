@@ -21,13 +21,13 @@ test('second play', t => {
   t.is(play.ptn(), 'c3')
 })
 
-test('white prefers flat chains', t => {
+test('white prefers flats', t => {
   const game = played('a1', 'a2')
 
   const plays = new Bot().best_plays(game.board, 0)
 
   t.deepEqual(plays.map(p => p.ptn()), [
-    'a3', 'b2'
+    'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3',
   ])
 })
 
@@ -37,7 +37,7 @@ test('black prefers flats', t => {
   const plays = new Bot().best_plays(game.board, 0)
 
   t.deepEqual(plays.map(p => p.ptn()), [
-    'b1'
+    'b1', 'b2', 'b3', 'c1', 'c2', 'c3',
   ])
 })
 
@@ -69,7 +69,7 @@ test('level 0 does not see tak', t => {
   const plays = bot.best_plays(game.board, 0)
 
   t.deepEqual(plays.map(p => p.ptn()), [
-    'b1'
+    'a3', 'b1', 'b3', 'c1', 'c2', 'c3',
   ])
 })
 
