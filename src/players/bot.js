@@ -147,7 +147,7 @@ export default class Bot extends Player {
     const chains = ['white', 'black'].reduce((a, c) => ({
       ...a,
       [c]: board.chains(c)
-        .filter(c => c.length > 2)
+        .filter(c => c.length > (c == board.turn ? 2 : 1))
         .reduce((sum, c) => sum + c.length, 0)
     }), {})
     const chain_diff = chains.white - chains.black

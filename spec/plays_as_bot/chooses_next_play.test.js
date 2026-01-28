@@ -27,8 +27,8 @@ test('white prefers flats', t => {
   const plays = new Bot().best_plays(game.board, 0)
 
   t.deepEqual(plays.map(p => p.ptn()), [
-    'a3', 'b1', 'b2', 'b3', 'c1', 'c2', 'c3',
-  ])
+    'a3', 'b2'
+  ], game.board.print())
 })
 
 test('black prefers flats', t => {
@@ -37,8 +37,8 @@ test('black prefers flats', t => {
   const plays = new Bot().best_plays(game.board, 0)
 
   t.deepEqual(plays.map(p => p.ptn()), [
-    'b1', 'b2', 'b3', 'c1', 'c2', 'c3',
-  ])
+    'b1'
+  ], game.board.print())
 })
 
 test('white finishes road', t => {
@@ -48,7 +48,7 @@ test('white finishes road', t => {
 
   t.deepEqual(plays.map(p => p.ptn()), [
     'c2'
-  ])
+  ], game.board.print())
 })
 
 test('black finishes road', t => {
@@ -58,7 +58,7 @@ test('black finishes road', t => {
 
   t.deepEqual(plays.map(p => p.ptn()), [
     'c1'
-  ])
+  ], game.board.print())
 })
 
 test('level 0 does not see tak', t => {
@@ -69,8 +69,8 @@ test('level 0 does not see tak', t => {
   const plays = bot.best_plays(game.board, 0)
 
   t.deepEqual(plays.map(p => p.ptn()), [
-    'a3', 'b1', 'b3', 'c1', 'c2', 'c3',
-  ])
+    'b1'
+  ], game.board.print())
 })
 
 test('prevent white road', t => {
@@ -81,8 +81,8 @@ test('prevent white road', t => {
   const plays = bot.best_plays(game.board, 1)
 
   t.deepEqual(plays.map(p => p.ptn()), [
-    'a2-'
-  ])
+    'a2-', 'c1'
+  ], game.board.print())
 })
 
 test('prevent other white road', t => {
@@ -94,7 +94,7 @@ test('prevent other white road', t => {
 
   t.deepEqual(plays.map(p => p.ptn()), [
     'b3'
-  ])
+  ], game.board.print())
 })
 
 test('prevent black road', t => {
@@ -109,7 +109,7 @@ test('prevent black road', t => {
 
   t.deepEqual(plays.map(p => p.ptn()), [
     'Sb2', 'Sc2'
-  ])
+  ], game.board.print())
 })
 
 test('white prefers the sooner road', t => {
@@ -120,7 +120,7 @@ test('white prefers the sooner road', t => {
 
   t.deepEqual(plays.map(p => p.ptn()), [
     'c3'
-  ])
+  ], game.board.print())
 })
 
 test('black prefers the sooner road', t => {
@@ -132,7 +132,7 @@ test('black prefers the sooner road', t => {
 
   t.deepEqual(plays.map(p => p.ptn()), [
     'c1'
-  ])
+  ], game.board.print())
 })
 
 function played(...plays) {
