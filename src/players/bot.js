@@ -49,13 +49,15 @@ export default class Bot extends Player {
     const start = new Date().getTime()
     const timeout = start + this.think_time_ms
     const sorted = this.legal_plays(board)
-    const info = { searched: 0 }
+    const info = { searched: 0, tree: {} }
+    const branch = info.tree
+    this.debug.push(info)
 
     let chosen = null
     let depth = 0
     try {
       for (; depth <= this.level; depth++) {
-        const plays = this.best_plays(board, depth, sorted, timeout, info)
+        const plays = this.best_plays(board, depth, sorted, timeout, info, branch)
         chosen = plays[Math.floor(this.random() * plays.length)]
         sorted.sort((a, b) => {
           if (plays.indexOf(a) > -1) return -1
@@ -72,19 +74,22 @@ export default class Bot extends Player {
     return chosen
   }
 
-  best_plays(board, depth, sorted, timeout, info) {
+  best_plays(board, depth, sorted, timeout, info, root) {
     let plays = []
 
     let best = -Infinity
     for (const play of sorted || this.legal_plays(board)) {
+      const branch = {}
       const score = -this.search(
         board.applied(play),
         depth,
         best,
         Infinity,
         timeout,
-        info)
+        info,
+        branch)
 
+      if (root) root[play.ptn()] = { score, branch }
       play.comment = `${score}@${depth}`
 
       if (score == best) plays.push(play)
@@ -97,7 +102,7 @@ export default class Bot extends Player {
     return plays
   }
 
-  search(board, depth, alpha, beta, timeout, info) {
+  search(board, depth, alpha, beta, timeout, info, root) {
     if (info) info.searched++
 
     if (timeout && new Date().getTime() > timeout)
@@ -112,14 +117,17 @@ export default class Bot extends Player {
     if (!depth) return this.evaluate(board)
 
     for (const play of this.legal_plays(board)) {
+      const branch = {}
       const score = -this.search(
         board.applied(play),
         depth - 1,
         -beta,
         -alpha,
         timeout,
-        info)
+        info,
+        branch)
 
+      if (root) root[play.ptn()] = { score, branch }
       if (this.pruning && score >= beta) return beta
       if (score > alpha) alpha = score
     }
