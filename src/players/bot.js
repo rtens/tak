@@ -50,53 +50,57 @@ export default class Bot extends Player {
     const timeout = start + this.think_time_ms
     const sorted = this.legal_plays(board)
     const info = { searched: 0, tree: {} }
-    const branch = info.tree
     this.debug.push(info)
 
     let chosen = null
     let depth = 0
-    try {
-      for (; depth <= this.level; depth++) {
-        const plays = this.best_plays(board, depth, sorted, timeout, info, branch)
-        chosen = plays[Math.floor(this.random() * plays.length)]
-        sorted.sort((a, b) => {
-          if (plays.indexOf(a) > -1) return -1
-          if (plays.indexOf(b) > -1) return 1
-          return 0
-        })
-      }
-    } catch (e) {
-      if (e != 'TIME') throw e
-      chosen.comment += ` timeout@${depth}`
+    for (; depth <= this.level; depth++) {
+      const branch = info.tree[depth] = []
+
+      const plays = this.best_plays(board, depth, sorted, timeout, info, branch)
+      if (!plays.length) break
+
+      chosen = plays[Math.floor(this.random() * plays.length)]
+      sorted.sort((a, b) => {
+        if (plays.indexOf(a) > -1) return -1
+        if (plays.indexOf(b) > -1) return 1
+        return 0
+      })
     }
 
-    chosen.comment += ` ${Math.round(info.searched / (new Date().getTime() - start + 1) * 1000)}/s`
+    const time = new Date().getTime() - start
+    chosen.comment += ` ${time}ms ${Math.round(info.searched / (time + 1) * 1000)}/s`
+    if (time > this.think_time_ms) chosen.comment += ' TIMEOUT'
     return chosen
   }
 
   best_plays(board, depth, sorted, timeout, info, root) {
     let plays = []
 
-    let best = -Infinity
-    for (const play of sorted || this.legal_plays(board)) {
-      const branch = {}
-      const score = -this.search(
-        board.applied(play),
-        depth,
-        best,
-        Infinity,
-        timeout,
-        info,
-        branch)
+    try {
+      let best = -Infinity
+      for (const play of sorted || this.legal_plays(board)) {
+        const branch = []
+        const score = -this.search(
+          board.applied(play),
+          depth,
+          best,
+          Infinity,
+          timeout,
+          info,
+          branch)
 
-      if (root) root[play.ptn()] = { score, branch }
-      play.comment = `${score}@${depth}`
+        if (root) root.push({ play: play.ptn(), score, branch })
+        play.comment = `${score}@${depth}`
 
-      if (score == best) plays.push(play)
-      if (score > best) {
-        best = score
-        plays = [play]
+        if (score == best) plays.push(play)
+        if (score > best) {
+          best = score
+          plays = [play]
+        }
       }
+    } catch (e) {
+      if (e != 'TIME') throw e
     }
 
     return plays
@@ -117,7 +121,7 @@ export default class Bot extends Player {
     if (!depth) return this.evaluate(board)
 
     for (const play of this.legal_plays(board)) {
-      const branch = {}
+      const branch = []
       const score = -this.search(
         board.applied(play),
         depth - 1,
@@ -127,7 +131,7 @@ export default class Bot extends Player {
         info,
         branch)
 
-      if (root) root[play.ptn()] = { score, branch }
+      if (root) root.push({ play: play.ptn(), score, branch })
       if (this.pruning && score >= beta) return beta
       if (score > alpha) alpha = score
     }
@@ -135,18 +139,23 @@ export default class Bot extends Player {
   }
 
   evaluate(board) {
+    const stash_diff = board.black.count() - board.white.count()
+
     const { white, black } = board.flat_count()
     const flat_diff = (white - black)
 
-    const stash_diff = board.black.count() - board.white.count()
-
-    const chains = board.chains(board.turn)
-      .filter(c => c.length > 1)
-      .reduce((sum, c) => sum + c.length, 0)
+    const chains = ['white', 'black'].reduce((a, c) => ({
+      ...a,
+      [c]: board.chains(c)
+        .filter(c => c.length > 1)
+        .reduce((sum, c) => sum + c.length, 0)
+    }), {})
+    chains[board.turn] /= 2
+    const chain_diff = chains.white - chains.black
 
     const evaluation = stash_diff
       + flat_diff * 10
-      + chains * 10
+      + chain_diff * 10
 
     return board.turn == 'white'
       ? evaluation

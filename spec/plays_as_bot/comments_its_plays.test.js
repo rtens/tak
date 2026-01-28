@@ -24,7 +24,7 @@ test('finish road', t => {
 
   const play = new Bot().play(game)
 
-  t.assert(play.comment.match(/9002@2 \d+\/s/),
+  t.assert(play.comment.match(/9002@2 \d+ms \d+\/s/),
     play.comment)
 })
 
@@ -35,7 +35,7 @@ test('level 0 does not see tak', t => {
   bot.level = 0
   const play = bot.play(game)
 
-  t.assert(play.comment.match(/-1@0 \d+\/s/),
+  t.assert(play.comment.match(/10@0 \d+ms \d+\/s/),
     play.comment)
 })
 
@@ -47,7 +47,7 @@ test('timeout', t => {
   bot.think_time_ms = 10
   const play = bot.play(game)
 
-  t.assert(play.comment.match(/@\d timeout@2 \d+\/s/),
+  t.assert(play.comment.match(/@\d \d+ms \d+\/s TIMEOUT/),
     play.comment)
 })
 
