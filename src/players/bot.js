@@ -148,12 +148,12 @@ export default class Bot extends Player {
       ...a,
       [c]: board.chains(c)
         .filter(c => c.length > 2)
-        .reduce((sum, c) => sum + c.length * c.length, 0)
+        .reduce((sum, c) => sum + c.length, 0)
     }), {})
-    chains[board.turn] /= 5
     const chain_diff = chains.white - chains.black
 
-    const evaluation = stash_diff
+    const evaluation = 0
+      + stash_diff * 10
       + flat_diff * 10
       + chain_diff * 10
 

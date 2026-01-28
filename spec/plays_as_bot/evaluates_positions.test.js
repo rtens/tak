@@ -38,9 +38,9 @@ test('less stash more better', t => {
   const board = new Board(5)
   board.white.take_flat()
 
-  t.is(new Bot().evaluate(board), 1)
+  t.is(new Bot().evaluate(board), 10)
   board.turn = 'black'
-  t.is(new Bot().evaluate(board), -1)
+  t.is(new Bot().evaluate(board), -10)
 })
 
 test('negative stash diff', t => {
@@ -52,9 +52,9 @@ test('negative stash diff', t => {
   board.black.take_flat()
   board.black.take_flat()
 
-  t.is(new Bot().evaluate(board), -2)
+  t.is(new Bot().evaluate(board), -20)
   board.turn = 'black'
-  t.is(new Bot().evaluate(board), 2)
+  t.is(new Bot().evaluate(board), 20)
 })
 
 test('the longer chains the better', t => {
@@ -66,9 +66,9 @@ test('the longer chains the better', t => {
   stack(board, 'c2', new Stone('white'))
   stack(board, 'e5', new Stone('white'))
 
-  t.is(new Bot().evaluate(board), 82)
+  t.is(new Bot().evaluate(board), 90)
   board.turn = 'black'
-  t.is(new Bot().evaluate(board), -210)
+  t.is(new Bot().evaluate(board), -90)
 })
 
 function stack(board, fr, ...pieces) {
