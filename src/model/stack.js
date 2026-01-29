@@ -1,6 +1,6 @@
 export default class Stack {
 
-  constructor(pieces) {
+  constructor(pieces = []) {
     this.pieces = pieces
   }
 
@@ -10,5 +10,9 @@ export default class Stack {
 
   drop(number) {
     return new Stack(this.pieces.splice(0, number))
+  }
+
+  add(stack) {
+    this.pieces.push(...stack.pieces)
   }
 }

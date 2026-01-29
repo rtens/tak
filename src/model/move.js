@@ -1,6 +1,7 @@
 import Play from './play.js'
 import Coords from './coords.js'
 import { Cap, Stone } from './piece.js'
+import Stack from './stack.js'
 
 export default class Move extends Play {
 
@@ -54,13 +55,12 @@ export default class Move extends Play {
     return this.drops.reduce((s, n) => s + n, 0)
   }
 
-  apply(board, color) {
-    let coords = this.coords
-    const square = board.square(coords)
-
-    this.validate_move(board, square, color)
-
+  apply(board) {
+    const square = board.square(this.coords)
+    this.validate_move(board, square)
     const stack = square.take(this.taken())
+
+    let coords = this.coords
     for (const drop of this.drops) {
       coords = coords.moved(this.direction)
 
@@ -69,11 +69,31 @@ export default class Move extends Play {
 
       this.validate_drop(square, dropped)
 
+      if (square.top() && square.top().standing)
+        this.smashed = true
+
       square.stack(dropped)
     }
   }
 
-  validate_move(board, square, color) {
+  revert(board) {
+    const stack = new Stack()
+
+    let coords = this.coords
+    for (const drop of this.drops) {
+      coords = coords.moved(this.direction)
+
+      const square = board.square(coords)
+      stack.add(square.take(drop))
+    }
+
+    if (this.smashed)
+       board.square(coords).top().stand()
+
+    board.square(this.coords).stack(stack)
+  }
+
+  validate_move(board, square) {
     if (!this.direction)
       throw new Error('Direction missing')
 
@@ -86,8 +106,8 @@ export default class Move extends Play {
     if (square.empty())
       throw new Error('Empty square')
 
-    if (square.top().color != color)
-      throw new Error(`Not ${color}'s stack`)
+    if (square.top().color != board.turn)
+      throw new Error(`Not ${board.turn}'s stack`)
   }
 
   validate_drop(square, dropped) {

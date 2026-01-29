@@ -22,6 +22,10 @@ export default class Board {
     this.white = new Stash().starting('white', ...pieces[size])
     this.black = new Stash().starting('black', ...pieces[size])
     this.squares = this.init_squares()
+    this.empty_cache()
+  }
+
+  empty_cache() {
     this.chain_cache = {}
   }
 
@@ -49,11 +53,16 @@ export default class Board {
     return square
   }
 
-  applied(play) {
-    const clone = this.clone()
-    play.apply(clone, this.turn)
-    clone.next()
-    return clone
+  apply(play) {
+    play.apply(this)
+    this.next()
+    this.empty_cache()
+  }
+
+  revert(play) {
+    this.next()
+    play.revert(this)
+    this.empty_cache()
   }
 
   game_over() {
@@ -191,10 +200,11 @@ export default class Board {
 
     const output = lines.join('\n').split('\n')
 
-    output[1] += '   C: ' + this.white.caps.length
-    output[2] += '   S: ' + this.white.stones.length
-    output[4] += '   c: ' + this.black.caps.length
-    output[5] += '   s: ' + this.black.stones.length
+    const turn = c => this.turn == c ? ' > ' : '   '
+    output[1] += turn('white') + 'C: ' + this.white.caps.length
+    output[2] += turn('white') + 'S: ' + this.white.stones.length
+    output[4] += turn('black') + 'c: ' + this.black.caps.length
+    output[5] += turn('black') + 's: ' + this.black.stones.length
 
     return output.join('\n')
   }

@@ -40,9 +40,9 @@ test('applies plays', async t => {
       if (game.plays.length < 2) {
         const name = this.name()
         return new class extends Place.Flat {
-          apply(board, color) {
-            applied.push([name, board.constructor, color])
-            super.apply(board, color)
+          apply(board) {
+            applied.push([name, board.constructor, board.turn])
+            super.apply(board)
           }
           ptn() {
             return name + "'s play"

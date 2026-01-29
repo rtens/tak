@@ -16,7 +16,11 @@ export default class Play {
     return this
   }
 
-  apply(_board, _color) {
+  apply(_board) {
+    throw new Error('not implemented')
+  }
+
+  revert(_board) {
     throw new Error('not implemented')
   }
 

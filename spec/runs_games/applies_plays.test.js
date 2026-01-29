@@ -174,7 +174,7 @@ test('spread stack', t => {
   check(t, game, 'd1', [new Stone('white').stand()])
 })
 
-test('flatten wall', t => {
+test('smash wall', t => {
   const game = new Game(5)
   game.perform(Place.Flat.at(0, 0))
   game.perform(Place.Flat.at(2, 2))

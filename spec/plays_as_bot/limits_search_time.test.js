@@ -62,5 +62,5 @@ test('prevents road', t => {
   bot.random = () => 0
   const play = bot.best_play(game.board)
 
-  t.is(play.ptn().slice(-2), 'b3')
+  t.is(play.ptn().slice(-2), 'b3', game.board.print())
 })

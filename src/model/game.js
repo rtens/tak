@@ -27,7 +27,7 @@ export default class Game {
     if (this.plays.length < 2 && !(play instanceof Place.Flat))
       throw new Error('First two plays must place flats')
 
-    this.board = this.board.applied(play)
+    this.board.apply(play)
     this.plays.push(play)
   }
 

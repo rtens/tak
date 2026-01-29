@@ -82,30 +82,31 @@ export default class Bot extends Player {
   best_plays(board, depth, sorted, timeout, info, root) {
     let plays = []
 
-    try {
-      let best = -Infinity
-      for (const play of sorted || this.legal_plays(board)) {
-        const branch = []
-        const score = -this.search(
-          board.applied(play),
-          depth,
-          best,
-          Infinity,
-          timeout,
-          info,
-          branch)
+    let best = -Infinity
+    for (const play of sorted || this.legal_plays(board)) {
+      const branch = []
 
-        if (root) root.push({ play: play.ptn(), score, branch })
-        play.comment = `${score}@${depth}`
+      board.apply(play)
+      const score = -this.search(
+        board,
+        depth,
+        best,
+        Infinity,
+        timeout,
+        info,
+        branch)
+      board.revert(play)
 
-        if (score == best) plays.push(play)
-        if (score > best) {
-          best = score
-          plays = [play]
-        }
+      if (score == 'TIMEOUT') break
+
+      if (root) root.push({ play: play.ptn(), score, branch })
+      play.comment = `${score}@${depth}`
+
+      if (score == best) plays.push(play)
+      if (score > best) {
+        best = score
+        plays = [play]
       }
-    } catch (e) {
-      if (e != 'TIME') throw e
     }
 
     return plays
@@ -114,27 +115,32 @@ export default class Bot extends Player {
   search(board, depth, alpha, beta, timeout, info, root) {
     if (info) info.searched++
 
-    if (timeout && new Date().getTime() > timeout)
-      throw 'TIME'
-
     const game_over = board.game_over()
     if (game_over instanceof Win)
       return game_over.color == board.turn
         ? 9000 + depth
         : -9000 - depth
 
+    if (timeout && new Date().getTime() > timeout)
+      return 'TIMEOUT'
+
     if (!depth) return this.evaluate(board)
 
     for (const play of this.legal_plays(board)) {
       const branch = []
+
+      board.apply(play)
       const score = -this.search(
-        board.applied(play),
+        board,
         depth - 1,
         -beta,
         -alpha,
         timeout,
         info,
         branch)
+      board.revert(play)
+
+      if (score == 'TIMEOUT') break
 
       if (root) root.push({ play: play.ptn(), score, branch })
       if (this.pruning && score >= beta) return beta
@@ -181,9 +187,15 @@ export default class Bot extends Player {
   }
 
   tak(board) {
-    for (const play of this.legal_plays(board))
-      if (board.applied(play).road(board.turn))
+    const turn = board.turn
+    for (const play of this.legal_plays(board)) {
+      board.apply(play)
+      if (board.road(turn)) {
+        board.revert(play)
         return true
+      }
+      board.revert(play)
+    }
 
     return false
   }
@@ -248,12 +260,12 @@ export default class Bot extends Player {
 
         for (const dropping of cache[height]) {
           if (!(
-                dropping.length == max + 1
-                && square.top() instanceof Cap
-                && dropping.slice(-1)[0] == 1
-                && target.name in board.squares
-                && board.square(target).top().standing)
-              && dropping.length > max)
+            dropping.length == max + 1
+            && square.top() instanceof Cap
+            && dropping.slice(-1)[0] == 1
+            && target.name in board.squares
+            && board.square(target).top().standing)
+            && dropping.length > max)
             continue
 
           plays.push(new Move(square.coords)
