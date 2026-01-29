@@ -15,6 +15,7 @@ export default class Bot extends Player {
     this.random = Math.random
     this.pruning = true
     this.debug = []
+    this.evaluations = { white: {}, black: {} }
   }
 
   at(level) {
@@ -139,6 +140,10 @@ export default class Bot extends Player {
   }
 
   evaluate(board) {
+    const key = board.fingerprint()
+    if (key in this.evaluations[board.turn])
+      return this.evaluations[board.turn][key]
+
     const stash_diff = board.black.count()
       - board.white.count()
 
@@ -159,6 +164,8 @@ export default class Bot extends Player {
 
     if (this.tak(board))
       relative += 300
+
+    this.evaluations[board.turn][key] = relative
 
     return relative
   }

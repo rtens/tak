@@ -176,21 +176,7 @@ export default class Board {
       for (let l = max - 1; l >= 0; l--) {
         const row = []
         for (const stack of stacks[r]) {
-          let p = ' '
-          const piece = stack[l]
-
-          if (piece) {
-            if (piece instanceof Stone) {
-              p = piece.standing ? 's' : 'f'
-            } else if (piece instanceof Cap) {
-              p = 'c'
-            }
-
-            if (piece.color == 'white') {
-              p = p.toUpperCase()
-            }
-          }
-
+          const p = stack[l] ? this.symbol(stack[l]) : ' '
           row.push(' ' + p + ' ')
         }
         rows.push((r + 1) + ' |' + row.join('|') + '|')
@@ -211,5 +197,19 @@ export default class Board {
     output[5] += '   s: ' + this.black.stones.length
 
     return output.join('\n')
+  }
+
+  symbol(piece) {
+    if (piece.color == 'white')
+      return piece instanceof Cap ? 'C' : (piece.standing ? 'S' : 'F')
+    else
+      return piece instanceof Cap ? 'c' : (piece.standing ? 's' : 'f')
+  }
+
+  fingerprint() {
+    return Object.values(this.squares)
+      .map(s => s.pieces
+        .map(p => this.symbol(p)).join(''))
+      .join('|')
   }
 }
