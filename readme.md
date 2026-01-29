@@ -1,4 +1,4 @@
-# Takbot
+# Taktik
 
 A simple bot to play Tak with.
 
