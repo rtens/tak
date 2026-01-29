@@ -207,7 +207,7 @@ export default class Board {
   }
 
   fingerprint() {
-    return Object.values(this.squares)
+    return this.turn + Object.values(this.squares)
       .map(s => s.pieces
         .map(p => this.symbol(p)).join(''))
       .join('|')

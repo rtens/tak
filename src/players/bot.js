@@ -15,7 +15,8 @@ export default class Bot extends Player {
     this.random = Math.random
     this.pruning = true
     this.debug = []
-    this.evaluations = { white: {}, black: {} }
+    this.evaluation_cache = {}
+    this.legal_plays_cache = {}
   }
 
   at(level) {
@@ -141,8 +142,8 @@ export default class Bot extends Player {
 
   evaluate(board) {
     const key = board.fingerprint()
-    if (key in this.evaluations[board.turn])
-      return this.evaluations[board.turn][key]
+    if (key in this.evaluation_cache)
+      return this.evaluation_cache[key]
 
     const stash_diff = board.black.count()
       - board.white.count()
@@ -165,7 +166,7 @@ export default class Bot extends Player {
     if (this.tak(board))
       relative += 300
 
-    this.evaluations[board.turn][key] = relative
+    this.evaluation_cache[key] = relative
 
     return relative
   }
@@ -185,8 +186,9 @@ export default class Bot extends Player {
   }
 
   legal_plays(board) {
-    if (board.legal_plays_cache)
-      return board.legal_plays_cache
+    const key = board.fingerprint()
+    if (key in this.legal_plays_cache)
+      return this.legal_plays_cache[key]
 
     if (board.game_over()) return []
 
@@ -202,7 +204,7 @@ export default class Bot extends Player {
       }
     }
 
-    board.legal_plays_cache = plays
+    this.legal_plays_cache[key] = plays
     return plays
 
     function place(square) {
