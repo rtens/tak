@@ -61,7 +61,7 @@ test('black finishes road', t => {
   ], game.board.print())
 })
 
-test('level 0 does not see tak', t => {
+test('level 0 sees tak', t => {
   const game = played('a1', 'a2', 'b2')
 
   const bot = new Bot()
@@ -69,7 +69,7 @@ test('level 0 does not see tak', t => {
   const plays = bot.best_plays(game.board, 0)
 
   t.deepEqual(plays.map(p => p.ptn()), [
-    'b1'
+    'a1+'
   ], game.board.print())
 })
 

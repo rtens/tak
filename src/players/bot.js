@@ -139,27 +139,42 @@ export default class Bot extends Player {
   }
 
   evaluate(board) {
-    const stash_diff = board.black.count() - board.white.count()
+    const stash_diff = board.black.count()
+      - board.white.count()
 
     const { white, black } = board.flat_count()
-    const flat_diff = (white - black)
+    const flat_diff = white - black
 
-    const chains = ['white', 'black'].reduce((a, c) => ({
-      ...a,
-      [c]: board.chains(c)
-        .filter(c => c.length > (c == board.turn ? 2 : 1))
-        .reduce((sum, c) => sum + c.length, 0)
-    }), {})
-    const chain_diff = chains.white - chains.black
+    const chain_diff = this.chains(board, 'white')
+      - this.chains(board, 'black')
 
     const evaluation = 0
       + stash_diff * 10
       + flat_diff * 10
       + chain_diff * 10
 
-    return board.turn == 'white'
+    let relative = board.turn == 'white'
       ? evaluation
       : -evaluation
+
+    if (this.tak(board))
+      relative += 300
+
+    return relative
+  }
+
+  chains(board, color) {
+    return board.chains(color)
+      .filter(c => c.length > (c == board.turn ? 2 : 1))
+      .reduce((sum, c) => sum + c.length, 0)
+  }
+
+  tak(board) {
+    for (const play of this.legal_plays(board))
+      if (board.applied(play).road(board.turn))
+        return true
+
+    return false
   }
 
   legal_plays(board) {

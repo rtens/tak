@@ -71,6 +71,18 @@ test('the longer chains the better', t => {
   t.is(new Bot().evaluate(board), -90)
 })
 
+test.only('tak is better', t => {
+  const board = new Board(3)
+  board.black.take_flat()
+
+  stack(board, 'a1', new Stone('black'))
+  stack(board, 'a2', new Stone('black'))
+
+  t.is(new Bot().evaluate(board), -50)
+  board.turn = 'black'
+  t.is(new Bot().evaluate(board), 350)
+})
+
 function stack(board, fr, ...pieces) {
   board.squares[fr].stack(new Stack(pieces))
 }

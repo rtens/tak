@@ -11,7 +11,6 @@ Make all sizes fun and challenging but winnable.
 ### 1. Improve 5x5 play
 - tweak evaluation
   - influence
-  - tak
 - speed up search
   - play generation
   - no cloning
