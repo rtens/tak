@@ -22,11 +22,20 @@ export default class Board {
     this.white = new Stash().starting('white', ...pieces[size])
     this.black = new Stash().starting('black', ...pieces[size])
     this.squares = this.init_squares()
+    this.create_neighbors()
     this.empty_cache()
   }
 
   empty_cache() {
     this.chain_cache = {}
+  }
+
+  create_neighbors() {
+    this.neighbors = {}
+    for (const [c, s] of Object.entries(this.squares))
+      this.neighbors[c] = Object.values(Move.directions)
+        .map(dir => s.coords.moved(dir).name)
+        .filter(n => n in this.squares)
   }
 
   next() {
@@ -154,14 +163,8 @@ export default class Board {
       return []
 
     const chain = [square]
-
-    const neighbors = Object.values(Move.directions)
-      .map(dir => square.coords.moved(dir).name)
-      .filter(n => n in this.squares)
-
-    for (const n of neighbors) {
+    for (const n of this.neighbors[c])
       chain.push(...this.build_chain(this.squares[n], color, checked))
-    }
 
     return chain
   }
