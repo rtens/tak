@@ -8,15 +8,16 @@ import parse from '../../src/model/parse.js'
 test('limited time', t => {
   const game = new Game(3)
 
-  const bot = new Bot().at(4)
+  const bot = new Bot().at(5)
   bot.think_time_ms = 100
 
   const start = new Date().getTime()
   const play = bot.best_play(game.board)
   const time = new Date().getTime() - start
 
-  t.assert(time < 120, 'Took ' + time + 'ms')
+  t.assert(time < 110, 'Took ' + time + 'ms')
   t.assert(play != null)
+  t.assert(!play.comment.includes('NaN'), play.comment)
 })
 
 test('finishes road', t => {
@@ -57,7 +58,7 @@ test('prevents road', t => {
   game.perform(parse('a3'))
   game.perform(parse('c3'))
 
-  const bot = new Bot().at(4)
+  const bot = new Bot().at(5)
   bot.think_time_ms = 100
   bot.random = () => 0
   const play = bot.best_play(game.board)

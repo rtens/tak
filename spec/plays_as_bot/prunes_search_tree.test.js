@@ -29,8 +29,8 @@ test('with pruning', t => {
   t.deepEqual(bot.searched, {
     0: 18,
     1: 306,
-    2: 972,
-    3: 6849,
+    2: 1230,
+    3: 7749,
   })
 })
 

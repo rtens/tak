@@ -5,6 +5,9 @@ import { Win } from '../model/result.js'
 import Player from '../player.js'
 import { Cap } from '../model/piece.js'
 
+const TIMEOUT = 'TIMEOUT'
+const GAME_OVER = 9000
+
 export default class Bot extends Player {
 
   constructor(runner, level, think_time) {
@@ -105,7 +108,7 @@ export default class Bot extends Player {
       const branch = []
 
       board.apply(play)
-      const score = -this.search(
+      const searched = this.search(
         board,
         depth,
         best,
@@ -115,7 +118,8 @@ export default class Bot extends Player {
         branch)
       board.revert(play)
 
-      if (score == 'TIMEOUT') break
+      if (searched == TIMEOUT) break
+      const score = -searched
 
       if (root) root.push({ play: play.ptn(), score, branch })
       play.comment = `${score}@${depth}`
@@ -133,22 +137,23 @@ export default class Bot extends Player {
   search(board, depth, alpha, beta, timeout, info, root) {
     if (info) info.searched++
 
-    const game_over = board.game_over()
-    if (game_over instanceof Win)
-      return game_over.color == board.turn
-        ? 9000 + depth
-        : -9000 - depth
+    const evaluation = this.evaluate(board)
+
+    if (!depth)
+      return evaluation
+    if (evaluation == GAME_OVER)
+      return evaluation + depth
+    if (evaluation == -GAME_OVER)
+      return evaluation - depth
 
     if (timeout && new Date().getTime() > timeout)
-      return 'TIMEOUT'
-
-    if (!depth) return this.evaluate(board)
+      return TIMEOUT
 
     for (const play of this.legal_plays(board)) {
       const branch = []
 
       board.apply(play)
-      const score = -this.search(
+      const searched = this.search(
         board,
         depth - 1,
         -beta,
@@ -158,7 +163,8 @@ export default class Bot extends Player {
         branch)
       board.revert(play)
 
-      if (score == 'TIMEOUT') break
+      if (searched == TIMEOUT) return TIMEOUT
+      const score = -searched
 
       if (root) root.push({ play: play.ptn(), score, branch })
       if (this.pruning && score >= beta) return beta
@@ -172,6 +178,16 @@ export default class Bot extends Player {
     const key = board.fingerprint()
     if (key in this.evaluation_cache)
       return this.evaluation_cache[key]
+
+    const game_over = board.game_over()
+    if (game_over instanceof Win) {
+      const evaluation = game_over.color == board.turn
+        ? GAME_OVER
+        : -GAME_OVER
+
+      this.evaluation_cache[key] = evaluation
+      return this.evaluation_cache[key]
+    }
 
     const stash_diff = board.black.count()
       - board.white.count()
@@ -192,7 +208,7 @@ export default class Bot extends Player {
       : -evaluation
 
     if (this.tak(board))
-      relative += 300
+      relative -= 300
 
     this.evaluation_cache[key] = relative
     return relative
@@ -205,17 +221,19 @@ export default class Bot extends Player {
   }
 
   tak(board) {
+    let road = false
+
+    board.next()
     const turn = board.turn
     for (const play of this.legal_plays(board)) {
       board.apply(play)
-      if (board.road(turn)) {
-        board.revert(play)
-        return true
-      }
+      road = !!board.road(turn)
       board.revert(play)
+      if (road) break
     }
+    board.next()
 
-    return false
+    return road
   }
 
   legal_plays(board) {

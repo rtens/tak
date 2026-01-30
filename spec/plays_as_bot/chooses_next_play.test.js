@@ -14,7 +14,7 @@ test('first play', t => {
 })
 
 test('second play', t => {
-  const game = played('a1')
+  const game = played(3, 'a1')
 
   const play = new Bot().play(game)
 
@@ -22,7 +22,7 @@ test('second play', t => {
 })
 
 test('white prefers flats', t => {
-  const game = played('a1', 'a2')
+  const game = played(4, 'a1', 'a2')
 
   const plays = new Bot().best_plays(game.board, 0)
 
@@ -32,7 +32,7 @@ test('white prefers flats', t => {
 })
 
 test('black prefers flats', t => {
-  const game = played('a1', 'a2', 'a3')
+  const game = played(3, 'a1', 'a2', 'a3')
 
   const plays = new Bot().best_plays(game.board, 0)
 
@@ -42,7 +42,7 @@ test('black prefers flats', t => {
 })
 
 test('white finishes road', t => {
-  const game = played('a1', 'a2', 'b2', 'a3')
+  const game = played(3, 'a1', 'a2', 'b2', 'a3')
 
   const plays = new Bot().best_plays(game.board, 0)
 
@@ -52,7 +52,7 @@ test('white finishes road', t => {
 })
 
 test('black finishes road', t => {
-  const game = played('a1', 'a2', 'a3', 'b1', 'c3')
+  const game = played(3, 'a1', 'a2', 'a3', 'b1', 'c3')
 
   const plays = new Bot().best_plays(game.board, 0)
 
@@ -61,20 +61,20 @@ test('black finishes road', t => {
   ], game.board.print())
 })
 
-test('level 0 sees tak', t => {
-  const game = played('a1', 'a2', 'b2')
+test('level 0 does not see tak', t => {
+  const game = played(3, 'a1', 'a2', 'b2')
 
   const bot = new Bot()
   bot.random = () => 0
   const plays = bot.best_plays(game.board, 0)
 
   t.deepEqual(plays.map(p => p.ptn()), [
-    'a1+'
+    'b1'
   ], game.board.print())
 })
 
 test('prevent white road', t => {
-  const game = played('a2', 'a1', 'b1')
+  const game = played(3, 'a2', 'a1', 'b1')
 
   const bot = new Bot()
   bot.random = () => 0
@@ -86,7 +86,7 @@ test('prevent white road', t => {
 })
 
 test('prevent other white road', t => {
-  const game = played('a1', 'c3', 'a2', 'a3', 'a2+')
+  const game = played(3, 'a1', 'c3', 'a2', 'a3', 'a2+')
 
   const bot = new Bot()
   bot.random = () => 0
@@ -98,7 +98,7 @@ test('prevent other white road', t => {
 })
 
 test('prevent black road', t => {
-  const game = played('a2', 'c3')
+  const game = played(3, 'a2', 'c3')
   game.board.squares['a2'].stack(new Stack([
     new Stone('black'),
     new Stone('black'),
@@ -113,7 +113,7 @@ test('prevent black road', t => {
 })
 
 test('white prefers the sooner road', t => {
-  const game = played('a1', 'a3', 'b3')
+  const game = played(3, 'a1', 'a3', 'b3')
   game.board.turn = 'white'
 
   const plays = new Bot().best_plays(game.board, 2)
@@ -124,7 +124,7 @@ test('white prefers the sooner road', t => {
 })
 
 test('black prefers the sooner road', t => {
-  const game = played('a1', 'a3')
+  const game = played(3, 'a1', 'a3')
   game.board.squares['b1'].stack(new Stack([new Stone('black')]))
   game.board.turn = 'black'
 
@@ -135,8 +135,28 @@ test('black prefers the sooner road', t => {
   ], game.board.print())
 })
 
-function played(...plays) {
-  const game = new Game(3)
+test('white prefers tak', t => {
+  const game = played(4, 'a1', 'a3', 'b3', 'a1>')
+
+  const plays = new Bot().best_plays(game.board, 0)
+
+  t.deepEqual(plays.map(p => p.ptn()), [
+    'c3'
+  ], game.board.print())
+})
+
+test('black prefers tak', t => {
+  const game = played(4, 'a1', 'a3', 'a3+', 'b1', 'a4-')
+
+  const plays = new Bot().best_plays(game.board, 0)
+
+  t.deepEqual(plays.map(p => p.ptn()), [
+    'c1'
+  ], game.board.print())
+})
+
+function played(size, ...plays) {
+  const game = new Game(size)
   plays.forEach(p => game.perform(parse(p)))
   return game
 }

@@ -6,7 +6,7 @@ import Board from '../../src/model/board.js'
 import Stack from '../../src/model/stack.js'
 import { Stone } from '../../src/model/piece.js'
 
-test.only('white wins', async t => {
+test('white wins', async t => {
   const inter = new MockInterface(t)
   const runner = new Runner(inter)
 
@@ -80,7 +80,7 @@ test('road with board fill', async t => {
 test('no road', t => {
   const board = new Board(4)
 
-  t.deepEqual(board.road('white'), null)
+  t.deepEqual(board.road('white'), undefined)
 })
 
 test('white snake', t => {

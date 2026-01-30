@@ -54,6 +54,7 @@ export default class Board {
   }
 
   next() {
+    this.reset_cache()
     if (this.turn == 'white')
       this.turn = 'black'
     else
@@ -69,13 +70,11 @@ export default class Board {
   apply(play) {
     play.apply(this)
     this.next()
-    this.reset_cache()
   }
 
   revert(play) {
     this.next()
     play.revert(this)
-    this.reset_cache()
   }
 
   game_over() {
