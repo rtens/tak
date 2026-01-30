@@ -8,14 +8,8 @@ Make all sizes fun and challenging but winnable.
 
 ## Plan
 
-### 1. Improve 5x5 play
-- tweak evaluation
-  - influence
-- speed up search
-  - play generation
-
 ### General stuff
-- starting plays in legal plays
+- opening plays in legal plays
 
 ### Maybe later
 - show Player options with args

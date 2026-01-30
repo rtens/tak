@@ -3,7 +3,7 @@ import Move from '../model/move.js'
 import Place from '../model/place.js'
 import { Win } from '../model/result.js'
 import Player from '../player.js'
-import { Stone, Cap } from '../model/piece.js'
+import { Cap } from '../model/piece.js'
 
 export default class Bot extends Player {
 
@@ -16,9 +16,13 @@ export default class Bot extends Player {
     this.random = Math.random
     this.pruning = true
     this.debug = []
+    this.drops_cache = {}
+    this.reset_cache()
+  }
+
+  reset_cache() {
     this.evaluation_cache = {}
     this.legal_plays_cache = {}
-    this.drops_cache = {}
   }
 
   at(level) {
@@ -50,6 +54,8 @@ export default class Bot extends Player {
   }
 
   best_play(board) {
+    this.reset_cache()
+
     const start = new Date().getTime()
     const timeout = start + this.think_time_ms
     const sorted = this.legal_plays(board)
@@ -61,7 +67,14 @@ export default class Bot extends Player {
     for (; depth <= this.level; depth++) {
       const branch = info.tree[depth] = []
 
-      const plays = this.best_plays(board, depth, sorted, timeout, info, branch)
+      const plays = this.best_plays(
+        board,
+        depth,
+        sorted,
+        timeout,
+        info,
+        branch)
+
       if (!plays.length) break
 
       chosen = plays[Math.floor(this.random() * plays.length)]
@@ -72,11 +85,16 @@ export default class Bot extends Player {
       })
     }
 
+    this.add_comment(start, info, chosen)
+
+    return chosen
+  }
+
+  add_comment(start, info, chosen) {
     const time = new Date().getTime() - start
     const searches = Math.round(info.searched / (time + 1) * 1000)
     chosen.comment += ` ${time}ms ${searches}/s`
     if (time > this.think_time_ms) chosen.comment += ' TIMEOUT'
-    return chosen
   }
 
   best_plays(board, depth, sorted, timeout, info, root) {
@@ -146,6 +164,7 @@ export default class Bot extends Player {
       if (this.pruning && score >= beta) return beta
       if (score > alpha) alpha = score
     }
+
     return alpha
   }
 
@@ -176,7 +195,6 @@ export default class Bot extends Player {
       relative += 300
 
     this.evaluation_cache[key] = relative
-
     return relative
   }
 
@@ -208,7 +226,7 @@ export default class Bot extends Player {
     if (board.game_over()) return []
 
     const plays = []
-    for (const square of Object.values(board.squares)) {
+    for (const square of board.squares_list) {
       if (square.empty())
         place(square)
       else if (square.top().color == board.turn)
@@ -239,15 +257,6 @@ export default class Bot extends Player {
         cache[height] = droppings
       }
 
-      const droppable = coords => {
-        if (!(coords.name in board.squares)) return false
-        const s = board.square(coords)
-        const top = s.top()
-        if (top instanceof Cap) return false
-        if (!top || !top.standing) return true
-        return false
-      }
-
       for (const dir in Move.directions) {
         const d = Move.directions[dir]
 
@@ -259,19 +268,31 @@ export default class Bot extends Player {
         }
 
         for (const dropping of cache[height]) {
-          if (!(
-            dropping.length == max + 1
-            && square.top() instanceof Cap
-            && dropping.slice(-1)[0] == 1
-            && target.name in board.squares
-            && board.square(target).top().standing)
-            && dropping.length > max)
+          if (dropping.length > max
+            && !smashable(dropping, max, target))
             continue
 
           plays.push(new Move(square.coords)
             .to(dir)
             .dropping(dropping))
         }
+      }
+
+      function droppable(coords) {
+        if (!(coords.name in board.squares)) return false
+        const s = board.square(coords)
+        const top = s.top()
+        if (top instanceof Cap) return false
+        if (!top || !top.standing) return true
+        return false
+      }
+
+      function smashable(dropping, max, target) {
+        return dropping.length == max + 1
+          && square.top() instanceof Cap
+          && dropping.slice(-1)[0] == 1
+          && target.name in board.squares
+          && board.square(target).top().standing
       }
     }
 

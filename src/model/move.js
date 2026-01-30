@@ -25,11 +25,6 @@ export default class Move extends Play {
     return this
   }
 
-  dropping(drops) {
-    this.drops = drops
-    return this
-  }
-
   up() {
     return this.to('+')
   }
@@ -44,6 +39,11 @@ export default class Move extends Play {
 
   left() {
     return this.to('<')
+  }
+
+  dropping(drops) {
+    this.drops = drops
+    return this
   }
 
   drop(number) {
@@ -88,7 +88,7 @@ export default class Move extends Play {
     }
 
     if (this.smashed)
-       board.square(coords).top().stand()
+      board.square(coords).top().stand()
 
     board.square(this.coords).stack(stack)
   }

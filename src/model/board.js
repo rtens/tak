@@ -21,13 +21,22 @@ export default class Board {
     this.turn = 'white'
     this.white = new Stash().starting('white', ...pieces[size])
     this.black = new Stash().starting('black', ...pieces[size])
-    this.squares = this.init_squares()
+    this.init_squares()
     this.create_neighbors()
-    this.empty_cache()
+    this.reset_cache()
   }
 
-  empty_cache() {
-    this.chain_cache = {}
+  init_squares() {
+    this.squares = {}
+    this.squares_list = []
+
+    for (let file = 0; file < this.size; file++) {
+      for (let rank = 0; rank < this.size; rank++) {
+        const square = new Square(new Coords(file, rank))
+        this.squares[square.coords.name] = square
+        this.squares_list.push(square)
+      }
+    }
   }
 
   create_neighbors() {
@@ -38,22 +47,17 @@ export default class Board {
         .filter(n => n in this.squares)
   }
 
+  reset_cache() {
+    this.chain_cache = {}
+    this.fingerprint_cache = null
+    this.game_over_cache = undefined
+  }
+
   next() {
     if (this.turn == 'white')
       this.turn = 'black'
     else
       this.turn = 'white'
-  }
-
-  init_squares() {
-    const squares = {}
-    for (let file = 0; file < this.size; file++) {
-      for (let rank = 0; rank < this.size; rank++) {
-        const coords = new Coords(file, rank)
-        squares[coords.name] = new Square(coords)
-      }
-    }
-    return squares
   }
 
   square(coords) {
@@ -65,35 +69,41 @@ export default class Board {
   apply(play) {
     play.apply(this)
     this.next()
-    this.empty_cache()
+    this.reset_cache()
   }
 
   revert(play) {
     this.next()
     play.revert(this)
-    this.empty_cache()
+    this.reset_cache()
   }
 
   game_over() {
-    if (this.road('white'))
-      return new RoadWin('white')
+    if (this.game_over_cache !== undefined)
+      return this.game_over_cache
 
-    if (this.road('black'))
-      return new RoadWin('black')
+    let go = null
 
-    if (this.finished()) {
+    if (this.road('white')) {
+      go = new RoadWin('white')
+
+    } else if (this.road('black')) {
+      go = new RoadWin('black')
+
+    } else if (this.finished()) {
       const { white, black } = this.flat_count()
 
       if (white > black) {
-        return new FlatWin('white')
+        go = new FlatWin('white')
       } else if (black > white) {
-        return new FlatWin('black')
+        go = new FlatWin('black')
       } else {
-        return new Draw()
+        go = new Draw()
       }
     }
 
-    return null
+    this.game_over_cache = go
+    return go
   }
 
   finished() {
@@ -103,40 +113,18 @@ export default class Board {
   }
 
   full() {
-    return !Object.values(this.squares).find(s => s.empty())
-  }
-
-  clone() {
-    const board = new Board(this.size)
-    board.turn = this.turn
-    board.white = this.white.clone()
-    board.black = this.black.clone()
-    board.squares = Object.entries(this.squares)
-      .reduce((acc, [c, s]) => ({ ...acc, [c]: s.clone() }), {})
-
-    return board
+    return !this.squares_list.find(s => s.empty())
   }
 
   flat_count() {
     const counts = { white: 0, black: 0 }
-    for (const square of Object.values(this.squares)) {
+    for (const square of this.squares_list) {
       const top = square.top()
       if (top instanceof Stone && !top.standing) {
         counts[top.color]++
       }
     }
     return counts
-  }
-
-  chains(color) {
-    const checked = {}
-
-    if (!this.chain_cache[color])
-      this.chain_cache[color] = Object.values(this.squares)
-        .map(square => this.build_chain(square, color, checked))
-        .filter(chain => chain.length)
-
-    return this.chain_cache[color]
   }
 
   road(color) {
@@ -148,6 +136,17 @@ export default class Board {
         return Math.min(...files) == 0 && Math.max(...files) == this.size - 1
           || Math.min(...ranks) == 0 && Math.max(...ranks) == this.size - 1
       })
+  }
+
+  chains(color) {
+    const checked = {}
+
+    if (!this.chain_cache[color])
+      this.chain_cache[color] = this.squares_list
+        .map(square => this.build_chain(square, color, checked))
+        .filter(chain => chain.length)
+
+    return this.chain_cache[color]
   }
 
   build_chain(square, color, checked) {
@@ -169,17 +168,30 @@ export default class Board {
     return chain
   }
 
-  print() {
-    const repeat = v => [...Array(this.size)].map(() => v)
-    let lines = ['  ,' + repeat('---').join('-') + ',']
+  clone() {
+    const board = new Board(this.size)
+    board.turn = this.turn
+    board.white = this.white.clone()
+    board.black = this.black.clone()
+    board.squares = Object.entries(this.squares)
+      .reduce((acc, [c, s]) => ({ ...acc, [c]: s.clone() }), {})
+    board.squares_list = Object.values(board.squares)
 
-    const stacks = []
-    for (let r = 0; r < this.size; r++) {
-      stacks.push([])
-      for (let f = 0; f < this.size; f++) {
-        stacks[r].push(this.square(new Coords(f, r)).pieces)
-      }
-    }
+    return board
+  }
+
+  fingerprint() {
+    if (!this.fingerprint_cache)
+      this.fingerprint_cache = this.turn + this.squares_list
+        .map(s => s.pieces
+          .map(p => this.symbol(p)).join(''))
+        .join('|')
+
+    return this.fingerprint_cache
+  }
+
+  print() {
+    const stacks = this.sort_stacks()
 
     const rows = []
     for (let r = this.size - 1; r >= 0; r--) {
@@ -193,15 +205,18 @@ export default class Board {
         }
         rows.push((r + 1) + ' |' + row.join('|') + '|')
       }
-      rows.push('  |' + repeat('---').join('-') + '|')
+      rows.push('  |' + this.repeat('---').join('-') + '|')
     }
 
-    lines.push(...rows.slice(0, -1))
-    lines.push("  '" + repeat('---').join('-') + "'")
-    lines.push('   ' + [...Array(this.size).keys()]
-      .map(i => ' ' + String.fromCharCode(97 + i) + ' ').join(' '))
+    const files = [...Array(this.size).keys()]
+      .map(i => ' ' + String.fromCharCode(97 + i) + ' ').join(' ')
 
-    const output = lines.join('\n').split('\n')
+    const output = [
+      '  ,' + this.repeat('---').join('-') + ',',
+      ...rows.slice(0, -1),
+      "  '" + this.repeat('---').join('-') + "'",
+      '   ' + files
+    ].join('\n').split('\n')
 
     const turn = c => this.turn == c ? ' > ' : '   '
     output[1] += turn('white') + 'C: ' + this.white.caps.length
@@ -212,17 +227,29 @@ export default class Board {
     return output.join('\n')
   }
 
-  symbol(piece) {
-    if (piece.color == 'white')
-      return piece instanceof Cap ? 'C' : (piece.standing ? 'S' : 'F')
-    else
-      return piece instanceof Cap ? 'c' : (piece.standing ? 's' : 'f')
+  repeat(v) {
+    return [...Array(this.size)].map(() => v)
   }
 
-  fingerprint() {
-    return this.turn + Object.values(this.squares)
-      .map(s => s.pieces
-        .map(p => this.symbol(p)).join(''))
-      .join('|')
+  sort_stacks() {
+    const stacks = []
+    for (let r = 0; r < this.size; r++) {
+      stacks.push([])
+      for (let f = 0; f < this.size; f++) {
+        stacks[r].push(this.square(new Coords(f, r)).pieces)
+      }
+    }
+    return stacks
+  }
+
+  symbol(piece) {
+    if (piece.color == 'white')
+      return piece instanceof Cap
+        ? 'C'
+        : (piece.standing ? 'S' : 'F')
+    else
+      return piece instanceof Cap
+        ? 'c'
+        : (piece.standing ? 's' : 'f')
   }
 }

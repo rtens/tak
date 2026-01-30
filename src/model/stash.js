@@ -27,6 +27,10 @@ export default class Stash {
       this.caps.push(new Cap(color))
   }
 
+  count() {
+    return this.stones.length + this.caps.length
+  }
+
   take_flat() {
     if (!this.stones.length) {
       throw new Error('No stones left')
@@ -56,10 +60,6 @@ export default class Stash {
         this.caps.push(piece)
       }
     }
-  }
-
-  count() {
-    return this.stones.length + this.caps.length
   }
 
   clone() {
