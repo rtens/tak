@@ -205,7 +205,7 @@ export default class Board {
         }
         rows.push((r + 1) + ' |' + row.join('|') + '|')
       }
-      rows.push('  |' + this.repeat('---').join('-') + '|')
+      rows.push('  |' + this.repeat('---').join('+') + '|')
     }
 
     const files = [...Array(this.size).keys()]
