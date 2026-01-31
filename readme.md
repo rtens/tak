@@ -6,8 +6,9 @@ A simple bot to play Tak with.
 
 Make all sizes fun and challenging but winnable.
 
-## Plan
+## Ideas
 
+- Undo Play
 - Show Player options with args
 - Web GUI
 - Game Server
