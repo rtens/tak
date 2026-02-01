@@ -7,6 +7,20 @@ class Piece {
 
 export class Stone extends Piece {
 
+  constructor(color) {
+    super(color)
+    this.standing = false
+  }
+
+  stand() {
+    this.standing = true
+    return this
+  }
+
+  flat() {
+    this.standing = false
+    return this
+  }
 }
 
 export class Cap extends Piece {

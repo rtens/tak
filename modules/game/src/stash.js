@@ -28,4 +28,12 @@ export default class Stash {
   take_flat() {
     return Stack.of(this.stones.pop())
   }
+
+  take_wall() {
+    return Stack.of(this.stones.pop().stand())
+  }
+
+  take_cap() {
+    return Stack.of(this.caps.pop())
+  }
 }
