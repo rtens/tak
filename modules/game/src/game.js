@@ -1,4 +1,5 @@
 import Board from './board.js'
+import Place from './place.js'
 
 export default class Game {
 
@@ -8,6 +9,9 @@ export default class Game {
   }
 
   perform(play) {
+    if (this.plays.length < 2 && !(play instanceof Place.Flat))
+      throw new Error('Must place flat')
+
     this.board.apply(play)
     this.plays.push(play)
   }

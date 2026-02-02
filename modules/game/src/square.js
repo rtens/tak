@@ -18,26 +18,22 @@ export default class Square {
     return this
   }
 
-  // empty() {
-  //   return this.pieces.length == 0
-  // }
+  empty() {
+    return this.pieces.length == 0
+  }
 
   top() {
-    // if (this.empty()) return null
     return this.pieces.slice(-1)[0]
   }
 
   stack(stack) {
-    this.pieces
-      // .filter(p => p instanceof Stone)
-      .forEach(p => p.flat())
+    this.pieces.forEach(p => p.flat())
     this.pieces.push(...stack.pieces)
   }
 
   take(number) {
-    // if (number > this.pieces.length) {
-    //   throw new Error(`Can only take ${this.pieces.length}`)
-    // }
+    if (number > this.pieces.length)
+      throw new Error('Over stack size')
 
     return new Stack(this.pieces.splice(-number, number))
   }

@@ -57,7 +57,7 @@ export default class Move extends Play {
 
   apply(board) {
     const square = board.square(this.coords)
-    // this.validate_move(board, square)
+    this.validate_move(board, square)
     const stack = square.take(this.taken())
 
     let coords = this.coords
@@ -67,7 +67,7 @@ export default class Move extends Play {
       const square = board.square(coords)
       const dropped = stack.drop(drop)
 
-      // this.validate_drop(square, dropped)
+      this.validate_drop(square, dropped)
 
       // if (square.top() && square.top().standing)
       //   this.smashed = true
@@ -93,36 +93,36 @@ export default class Move extends Play {
   //   board.square(this.coords).stack(stack)
   // }
 
-  // validate_move(board, square) {
-  //   if (!this.direction)
-  //     throw new Error('Direction missing')
+  validate_move(board, square) {
+    if (!this.direction)
+      throw new Error('No direction')
 
-  //   if (this.taken() > board.size)
-  //     throw new Error(`Carry limit is ${board.size}`)
+    if (!this.drops.length)
+      throw new Error('No drops')
 
-  //   if (!this.drops.length)
-  //     throw new Error('No drops')
+    if (square.empty())
+      throw new Error('Empty square')
 
-  //   if (square.empty())
-  //     throw new Error('Empty square')
+    if (square.top().color != board.turn)
+      throw new Error(`Not your stack`)
 
-  //   if (square.top().color != board.turn)
-  //     throw new Error(`Not ${board.turn}'s stack`)
-  // }
+    if (this.taken() > board.size)
+      throw new Error(`Over carry limit`)
+  }
 
-  // validate_drop(square, dropped) {
-  //   if (!dropped.pieces.length)
-  //     throw new Error('Empty drop')
+  validate_drop(square, dropped) {
+    if (!dropped.pieces.length)
+      throw new Error('Empty drop')
 
-  //   if (square.top() instanceof Cap)
-  //     throw new Error("Can't stack on cap")
+    if (square.top() instanceof Cap)
+      throw new Error('Drop on cap')
 
-  //   if (square.top() instanceof Stone
-  //     && (square.top()).standing
-  //     && !(dropped.pieces[0] instanceof Cap)
-  //   )
-  //     throw new Error("Can't stack on wall")
-  // }
+    if (square.top() instanceof Stone
+      && (square.top()).standing
+      && !(dropped.pieces[0] instanceof Cap)
+    )
+      throw new Error('Drop on wall')
+  }
 
   // ptn() {
   //   let ptn = this.coords.name + this.symbol

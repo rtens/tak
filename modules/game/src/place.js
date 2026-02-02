@@ -4,9 +4,8 @@ export default class Place extends Play {
 
   apply(board) {
     const square = board.square(this.coords)
-    // if (!square.empty()) {
-    //   throw new Error('Square not empty')
-    // }
+    if (!square.empty())
+      throw new Error('Square not empty')
 
     square.stack(this.take_piece(board[board.turn]))
   }

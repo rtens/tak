@@ -26,14 +26,20 @@ export default class Stash {
   }
 
   take_flat() {
+    if (!this.stones.length)
+      throw new Error('No stones left')
     return Stack.of(this.stones.pop())
   }
 
   take_wall() {
+    if (!this.stones.length)
+      throw new Error('No stones left')
     return Stack.of(this.stones.pop().stand())
   }
 
   take_cap() {
+    if (!this.caps.length)
+      throw new Error('No caps left')
     return Stack.of(this.caps.pop())
   }
 }
