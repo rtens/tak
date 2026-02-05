@@ -11,11 +11,20 @@ export default class Play {
     return new this(new Coords(file, rank))
   }
 
+  commented(comment) {
+    this.comment = comment
+    return this
+  }
+
   apply(_board) {
     throw new Error('not implemented')
   }
 
   revert(_board) {
     throw new Error('not implemented')
+  }
+
+  ptn() {
+    return 'ptn'
   }
 }

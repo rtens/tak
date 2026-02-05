@@ -2,7 +2,7 @@ import test from 'ava'
 import Place from '../src/place.js'
 import Move from '../src/move.js'
 import { Cap, Stone } from '../src/piece.js'
-import { board, setup_game } from './fixture.js'
+import { board, setup_game } from './lib/fixture.js'
 
 test('place flat', t => {
   const game = setup_game()

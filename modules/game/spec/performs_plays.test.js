@@ -3,7 +3,7 @@ import Game from '../src/game.js'
 import Place from '../src/place.js'
 import Move from '../src/move.js'
 import { Cap, Stone } from '../src/piece.js'
-import { board, setup_game } from './fixture.js'
+import { board, setup_game } from './lib/fixture.js'
 
 test('takes turns', t => {
   const game = new Game(3)

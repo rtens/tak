@@ -18,6 +18,14 @@ export default class Place extends Play {
   take_piece(_stash) {
     throw new Error('not implemented')
   }
+
+  ptn() {
+    return this.prefix() + this.coords.name
+  }
+
+  prefix() {
+    return ''
+  }
 }
 
 Place.Flat = class extends Place {
@@ -32,11 +40,19 @@ Place.Wall = class extends Place {
   take_piece(stash) {
     return stash.take_wall()
   }
+
+  prefix() {
+    return 'S'
+  }
 }
 
 Place.Cap = class extends Place {
 
   take_piece(stash) {
     return stash.take_cap()
+  }
+
+  prefix() {
+    return 'C'
   }
 }

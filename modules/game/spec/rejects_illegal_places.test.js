@@ -1,7 +1,7 @@
 import test from 'ava'
 import Game from '../src/game.js'
 import Place from '../src/place.js'
-import { setup_game } from './fixture.js'
+import { setup_game } from './lib/fixture.js'
 
 test('not a square', t => {
   const game = new Game(3)

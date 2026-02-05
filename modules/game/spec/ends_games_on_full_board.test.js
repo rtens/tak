@@ -1,5 +1,5 @@
 import test from 'ava'
-import { setup_game } from './fixture.js'
+import { setup_game } from './lib/fixture.js'
 import Place from '../src/place.js'
 import { Draw, FlatWin } from '../src/result.js'
 

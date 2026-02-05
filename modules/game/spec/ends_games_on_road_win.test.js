@@ -2,7 +2,7 @@ import test from 'ava'
 import Place from '../src/place.js'
 import { RoadWin } from '../src/result.js'
 import Move from '../src/move.js'
-import { setup_game } from './fixture.js'
+import { setup_game } from './lib/fixture.js'
 
 test('white road', t => {
   const game = setup_game(3, [[], ['F', 'F']])

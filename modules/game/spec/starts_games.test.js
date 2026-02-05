@@ -2,8 +2,10 @@ import test from 'ava'
 import Game from '../src/game.js'
 
 test('white starts', t => {
-  const game = new Game(3)
+  const game = new Game(3, 'one', 'two')
 
+  t.is(game.white, 'one')
+  t.is(game.black, 'two')
   t.is(game.board.turn, 'white')
 })
 

@@ -25,19 +25,19 @@ export default class Move extends Play {
   }
 
   up() {
-    return this.to(Move.directions.up)
+    return this.to('up')
   }
 
   down() {
-    return this.to(Move.directions.down)
+    return this.to('down')
   }
 
   right() {
-    return this.to(Move.directions.right)
+    return this.to('right')
   }
 
   left() {
-    return this.to(Move.directions.left)
+    return this.to('left')
   }
 
   dropping(drops) {
@@ -61,7 +61,7 @@ export default class Move extends Play {
 
     let coords = this.coords
     for (const drop of this.drops) {
-      coords = coords.moved(this.direction)
+      coords = coords.moved(Move.directions[this.direction])
 
       const square = board.square(coords)
       const dropped = stack.drop(drop)
@@ -80,7 +80,7 @@ export default class Move extends Play {
 
     let coords = this.coords
     for (const drop of this.drops) {
-      coords = coords.moved(this.direction)
+      coords = coords.moved(Move.directions[this.direction])
 
       const square = board.square(coords)
       stack.add(square.take(drop))
@@ -121,5 +121,24 @@ export default class Move extends Play {
       && !(dropped.pieces[0] instanceof Cap)
     )
       throw new Error('Drop on wall')
+  }
+
+  ptn() {
+    const symbols = {
+      up: '+',
+      down: '-',
+      left: '<',
+      right: '>'
+    }
+
+    let ptn = this.coords.name + symbols[this.direction]
+
+    if (this.taken() > 1)
+      ptn = this.taken() + ptn
+
+    if (this.drops.length > 1)
+      ptn += this.drops.join('')
+
+    return ptn
   }
 }

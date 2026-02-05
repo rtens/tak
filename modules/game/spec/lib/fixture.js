@@ -1,7 +1,7 @@
-import Coords from '../src/coords.js'
-import Game from '../src/game.js'
-import { Cap, Stone } from '../src/piece.js'
-import Stack from '../src/stack.js'
+import Coords from '../../src/coords.js'
+import Game from '../../src/game.js'
+import { Cap, Stone } from '../../src/piece.js'
+import Stack from '../../src/stack.js'
 
 export function board(size, content) {
   const squares = {}
@@ -37,7 +37,7 @@ function coords(size, r, c) {
 }
 
 function parse(stack) {
-  return new Stack(stack.trim().split('').map(s => pieces[s]));
+  return new Stack(stack.trim().split('').map(s => pieces[s]))
 }
 
 const pieces = {
