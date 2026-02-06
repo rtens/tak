@@ -2,6 +2,7 @@ import Player from '../../../moderator/src/player.js'
 import Place from '../../../game/src/place.js'
 import Move from '../../../game/src/move.js'
 import { Cap } from '../../../game/src/piece.js'
+import Coords from '../../../game/src/coords.js'
 
 export default class Bot extends Player {
 
@@ -15,16 +16,174 @@ export default class Bot extends Player {
   }
 
   async play(game) {
-    const legals = this.legals(game.board)
-    const random = Math.floor(this.random() * legals.length)
-    return legals[random]
+    if (game.plays.length < 2)
+      return this.opening(game.board)
+
+    return this.best(game.board)
+  }
+
+  opening(board) {
+    const s = board.size - 1
+    const corners = [
+      new Coords(0, 0),
+      new Coords(s, s),
+    ]
+
+    const empty_corner = corners.find(c => board.square(c).empty())
+
+    return new Place.Flat(empty_corner)
+  }
+
+  best(board) {
+    this.reset_cache()
+
+    const start = new Date().getTime()
+    const timeout = start + this.think_time_ms
+    const sorted = this.legal_plays(board)
+    const info = { searched: 0, tree: {} }
+    this.debug.push(info)
+
+    let chosen = null
+    let depth = 0
+    for (; depth <= this.level; depth++) {
+      const branch = info.tree[depth] = []
+
+      const plays = this.best_plays(
+        board,
+        depth,
+        sorted,
+        timeout,
+        info,
+        branch)
+
+      if (!plays.length) break
+
+      chosen = plays[Math.floor(this.random() * plays.length)]
+      sorted.sort((a, b) => {
+        if (plays.indexOf(a) > -1) return -1
+        if (plays.indexOf(b) > -1) return 1
+        return 0
+      })
+    }
+
+    this.add_comment(start, info, chosen)
+
+    return chosen
+  }
+
+  best_plays(board, depth, sorted, timeout, info, root) {
+    let plays = []
+
+    let best = -Infinity
+    for (const play of sorted || this.legal_plays(board)) {
+      const branch = []
+
+      board.apply(play)
+      const searched = this.search(
+        board,
+        depth,
+        best,
+        Infinity,
+        timeout,
+        info,
+        branch)
+      board.revert(play)
+
+      if (searched == TIMEOUT) break
+      const score = -searched
+
+      if (root) root.push({ play: play.ptn(), score, branch })
+      play.comment = `${score}@${depth}`
+
+      if (score == best) plays.push(play)
+      if (score > best) {
+        best = score
+        plays = [play]
+      }
+    }
+
+    return plays
+  }
+
+  search(board, depth, alpha, beta, timeout, info, root) {
+    if (info) info.searched++
+
+    const evaluation = this.evaluate(board)
+
+    if (!depth)
+      return evaluation
+    if (evaluation >= GAME_OVER)
+      return evaluation + depth * 100
+    if (evaluation <= -GAME_OVER)
+      return evaluation - depth * 100
+
+    if (timeout && new Date().getTime() > timeout)
+      return TIMEOUT
+
+    for (const play of this.legal_plays(board)) {
+      const branch = []
+
+      board.apply(play)
+      const searched = this.search(
+        board,
+        depth - 1,
+        -beta,
+        -alpha,
+        timeout,
+        info,
+        branch)
+      board.revert(play)
+
+      if (searched == TIMEOUT) return TIMEOUT
+      const score = -searched
+
+      if (root) root.push({ play: play.ptn(), score, branch })
+      if (this.pruning && score >= beta) return beta
+      if (score > alpha) alpha = score
+    }
+
+    return alpha
+  }
+
+  evaluate(board) {
+    const key = board.fingerprint()
+    if (key in this.evaluation_cache)
+      return this.evaluation_cache[key]
+
+    let over = 0
+    const game_over = board.game_over()
+    if (game_over instanceof Win)
+      over = game_over.color == 'white'
+        ? GAME_OVER
+        : -GAME_OVER
+
+    const stash_diff = board.black.count()
+      - board.white.count()
+
+    const { white, black } = board.flat_count()
+    const flat_diff = white - black
+
+    const chain_diff = this.chains(board, 'white')
+      - this.chains(board, 'black')
+
+    const evaluation = 0
+      + stash_diff * 10
+      + flat_diff * 50
+      + chain_diff * 10
+      + over
+
+    let relative = board.turn == 'white'
+      ? evaluation
+      : -evaluation
+
+    if (!over && this.tak(board))
+      relative -= 100
+
+    this.evaluation_cache[key] = relative
+    return relative
   }
 
   legals(board) {
-    // const key = board.fingerprint()
-    // if (key in this.legal_plays_cache)
-    //   return this.legal_plays_cache[key]
-
     if (board.game_over()) return []
 
     const plays = []
@@ -32,10 +191,9 @@ export default class Bot extends Player {
       if (square.empty())
         place(square)
       else if (square.top().color == board.turn)
-        move(square, this.drops_cache)
+        move(square)
     }
 
-    // this.legal_plays_cache[key] = plays
     return plays
 
     function place(square) {
@@ -49,14 +207,11 @@ export default class Bot extends Player {
           new Place.Cap(square.coords))
     }
 
-    function move(square, cache = {}) {
+    function move(square) {
       const height = Math.min(board.size, square.pieces.length)
-      if (!(height in cache)) {
-        const droppings = []
-        for (let take = 1; take <= height; take++) {
-          droppings.push(...spread([], take))
-        }
-        cache[height] = droppings
+      const droppings = []
+      for (let take = 1; take <= height; take++) {
+        droppings.push(...spread([], take))
       }
 
       for (const dir in Move.directions) {
@@ -69,7 +224,7 @@ export default class Bot extends Player {
           target = target.moved(d)
         }
 
-        for (const dropping of cache[height]) {
+        for (const dropping of droppings) {
           if (dropping.length > max
             && !smashable(dropping, max, target))
             continue
