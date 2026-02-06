@@ -24,7 +24,8 @@ export default class Moderator {
       const play = await player.play(game)
 
       if (!play) {
-        return
+        this.user.tell(`${player.name()} forfeits`)
+        game.forfeit()
 
       } else {
         const paint = this.paint[game.board.turn]
@@ -37,6 +38,10 @@ export default class Moderator {
         }
       }
     }
+
+    Object.values(players).forEach(p => p.over(game))
+    this.print_result(game, players)
+    this.user.bye()
   }
 
   async players() {
@@ -54,7 +59,7 @@ export default class Moderator {
   }
 
   async player(prompt) {
-    const input = await this.user.ask(prompt)
+    const input = (await this.user.ask(prompt)) || 'bot'
     const [player, ...args] = input.split(' ')
     const file = `../../players/${player}/src/${player}.js`
     const { default: Player } = await this.import(file)
@@ -66,5 +71,13 @@ export default class Moderator {
     const size = Math.max(3, Math.min(8, parseInt(input) || 5))
     const game = new Game(size, players.white.name(), players.black.name())
     return game
+  }
+
+  print_result(game) {
+    const result = game.result()
+    this.user.tell(this.user.paint('red', result.ptn()))
+
+    const file = 'games/' + game.started.slice(0, 19).replace(/\D/g, '_')
+    this.user.save(file, game.ptn())
   }
 }

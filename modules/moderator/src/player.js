@@ -8,7 +8,11 @@ export default class Player {
     return 'Unknown'
   }
 
-  async play() {
+  async play(_game) {
     return null
+  }
+
+  over(_game) {
+
   }
 }

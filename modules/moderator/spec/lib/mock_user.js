@@ -5,6 +5,7 @@ export default class MockUser {
   constructor() {
     this.answers = []
     this.told = []
+    this.saved = []
   }
 
   answer(prompt, answer) {
@@ -23,5 +24,13 @@ export default class MockUser {
 
   paint(_color, message) {
     return message
+  }
+
+  save(file, content) {
+    this.saved.push({ file, content })
+  }
+
+  bye() {
+    this.closed = true
   }
 }

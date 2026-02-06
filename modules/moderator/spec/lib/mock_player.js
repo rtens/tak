@@ -9,7 +9,10 @@ export default class MockPlayer extends Player {
 
   async play(game) {
     this.constructor.playing = game
+    return null
   }
+
+  over() { }
 
   static playing(...plays) {
     return class extends MockPlayer {

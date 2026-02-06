@@ -24,6 +24,27 @@ test('load file', async t => {
   ])
 })
 
+test('default player', async t => {
+  const user = new MockUser()
+  const mod = new Moderator(user)
+
+  const imported = []
+  mod.import = file => {
+    imported.push(file)
+    return { default: MockPlayer }
+  }
+
+  user.answer('Player 1', '')
+  user.answer('Player 2', '')
+
+  await mod.start()
+
+  t.deepEqual(imported, [
+    '../../players/bot/src/bot.js',
+    '../../players/bot/src/bot.js',
+  ])
+})
+
 test('pass arguments', async t => {
   const user = new MockUser()
   const mod = new Moderator(user)
