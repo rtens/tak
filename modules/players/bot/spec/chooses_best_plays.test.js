@@ -1,0 +1,44 @@
+import test from 'ava'
+import { setup_game } from '../../../game/spec/lib/fixture.js'
+import Bot from '../src/bot.js'
+
+test('find road', t => {
+  const game = setup_game(3, [
+    ['F', 'F']
+  ])
+
+  const bot = new Bot()
+  const plays = bot.best_plays(game.board, 0)
+
+  t.deepEqual(plays.map(p => p.ptn()), [
+    'c3'
+  ])
+})
+
+test('prevent road', t => {
+  const game = setup_game(3, [
+    ['f', 'f']
+  ])
+
+  const bot = new Bot()
+  const plays = bot.best_plays(game.board, 1)
+
+  t.deepEqual(plays.map(p => p.ptn()), [
+    'c3', 'Sc3'
+  ])
+})
+
+test('find tinue', t => {
+  const game = setup_game(3, [
+    ['F'],
+    [],
+    ['', '', 'F']
+  ])
+
+  const bot = new Bot()
+  const plays = bot.best_plays(game.board, 2)
+
+  t.deepEqual(plays.map(p => p.ptn()), [
+    'a1', 'c3'
+  ])
+})
