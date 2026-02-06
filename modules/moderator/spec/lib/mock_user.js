@@ -1,5 +1,3 @@
-import User from '../../src/user.js'
-
 export default class MockUser {
 
   constructor() {
