@@ -15,7 +15,7 @@ export default class Bot extends Player {
   }
 
   name() {
-    return 'Bot'
+    return 'Bot' + this.level
   }
 
   async play(game) {
@@ -23,6 +23,10 @@ export default class Bot extends Player {
       return this.opening(game.board)
 
     return this.best(game.board)
+  }
+
+  legals(board) {
+    return new LegalPlays(board).generate()
   }
 
   opening(board) {
@@ -89,10 +93,24 @@ export default class Bot extends Player {
   }
 
   evaluate(board) {
-    return 0
+    const { white, black } = board.flat_count()
+    const flat_diff = white - black
+
+    const chain_diff = this.chains(board, 'white')
+      - this.chains(board, 'black')
+
+    const evaluation = 0
+      + flat_diff * 10
+      + chain_diff * 10
+
+    return board.turn == 'white'
+      ? evaluation
+      : -evaluation
   }
 
-  legals(board) {
-    return new LegalPlays(board).generate()
+  chains(board, color) {
+    return board.chains(color)
+      .filter(c => c.length > 1)
+      .reduce((sum, c) => sum + c.length, 0)
   }
 }
