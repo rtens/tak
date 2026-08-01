@@ -34,7 +34,8 @@ export default class Moderator {
         try {
           game.perform(play)
         } catch (e) {
-          this.user.tell('Illegal play: ' + e.message)
+          this.user.tell('Illegal play: '
+            + this.user.paint('red', e.message))
         }
       }
     }
