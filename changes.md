@@ -13,6 +13,9 @@ This document keeps track of current, planned, ideas for, and completed changes.
 
 ## Planned
 
+- Stabilize flaky test: bot/timeout
+- Stabilize flaky test: bot/prevent road
+
 
 ## Ideas
 
