@@ -71,27 +71,25 @@ export default class Board {
     const other = this.turn == 'white'
       ? 'black' : 'white'
 
-    let over = null
-
     if (this.road(other)) {
-      over = new RoadWin(other)
+      return new RoadWin(other)
 
     } else if (this.road(this.turn)) {
-      over = new RoadWin(this.turn)
+      return new RoadWin(this.turn)
 
     } else if (this.finished()) {
       const { white, black } = this.flat_count()
 
       if (white > black) {
-        over = new FlatWin('white')
+        return new FlatWin('white')
       } else if (black > white) {
-        over = new FlatWin('black')
+        return new FlatWin('black')
       } else {
-        over = new Draw()
+        return new Draw()
       }
     }
 
-    return over
+    return null
   }
 
   finished() {
